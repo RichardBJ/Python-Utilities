@@ -1,103 +1,49 @@
 
 
-1	Koh (2006) 
-https://doi.org/br78vp
+1 XXXX https://doi.org/10.1038/35006031
+http://shortdoi.org/10.1038/35006031?format=json
+https://doi.org/cppkk7
 
-2	Froy (Bethesda) 26, 225-235 (2011) 
-https://doi.org/fn6ngq
+2 XXXX https://doi.org/10.1038/nchem.295
+http://shortdoi.org/10.1038/nchem.295?format=json
+https://doi.org/fsq3dc
 
-3	Zhdanova (2011) 
-https://doi.org/c4t9gr
+3 XXXX https://doi.org/10.1038/nmat2403
+http://shortdoi.org/10.1038/nmat2403?format=json
+https://doi.org/bmw9jq
 
-4	Skene (2003) 
-https://doi.org/bcxtmw
+2 XXXX https://doi.org/10.1021/ja202986s
+http://shortdoi.org/10.1021/ja202986s?format=json
+https://doi.org/cmt6ft
 
-5	Nunn (2011) 
-https://doi.org/bsvv2n
+2 XXXX https://doi.org/10.1038/s41598-017-05693-3
+http://shortdoi.org/10.1038/s41598-017-05693-3?format=json
+https://doi.org/gbpvdp
 
-6	Kiss (1991) 
-https://doi.org/bpzsvt
+2 XXXX https://doi.org/10.3390/nano12040683
+http://shortdoi.org/10.3390/nano12040683?format=json
+https://doi.org/grgtkz
 
-7	Feetham (2014) 
-https://doi.org/jp4r
+1 XXXX https://doi.org/10.1038/35006031
+http://shortdoi.org/10.1038/35006031?format=json
+https://doi.org/cppkk7
 
-8	Womack (2007) 
-https://doi.org/fdv48x
+2 XXXX https://doi.org/10.1038/nchem.295
+http://shortdoi.org/10.1038/nchem.295?format=json
+https://doi.org/fsq3dc
 
-9	Nunn (2013) 
-https://doi.org/f5b7mh
+3 XXXX https://doi.org/10.1038/nmat2403
+http://shortdoi.org/10.1038/nmat2403?format=json
+https://doi.org/bmw9jq
 
-10	Feetham (2015) 
-https://doi.org/jp4s
+2 XXXX https://doi.org/10.1021/ja202986s
+http://shortdoi.org/10.1021/ja202986s?format=json
+https://doi.org/cmt6ft
 
-11	Feetham (2015) 
-https://doi.org/f6588b
+2 XXXX https://doi.org/10.1038/s41598-017-05693-3
+http://shortdoi.org/10.1038/s41598-017-05693-3?format=json
+https://doi.org/gbpvdp
 
-12	O'Brien (2022) 
-https://doi.org/jp4z
-
-13	Abe (2002) 
-https://doi.org/ghxjdt
-
-14	Mieda (2006) 
-https://doi.org/fb5qpp
-
-15	Barrett-Jolley (2000) 
-https://doi.org/bzndxz
-
-16	Womack (THDOC) of pre-sympathetic parvocellular neurones in the paraventricular nucleus of rat hypothalamus. Brit J Pharmacol 149, 600-607 (2006) 
-https://doi.org/bdkv93
-
-17	Chuong (2014) 
-https://doi.org/f6bbnk
-
-18	Moskon (2020) 
-https://doi.org/gqth36
-
-19	Celik (2020) 
-https://doi.org/jp4v
-
-20	Ball (2022) 
-https://doi.org/jp4w
-
-21	Martinac (2008) 
-https://doi.org/c7c8gq
-
-22	Doyle (1998) 
-https://doi.org/ff8wqd
-
-23	Prindle (2015) 
-https://doi.org/f7w8ks
-
-24	Costerton (1999) 
-https://doi.org/dt9xd5
-
-25	Masi (2015) 
-https://doi.org/gnj2b9
-
-26	Noma (1983) 
-https://doi.org/dtsd7f
-
-27	Lam (2019) 
-https://doi.org/grgrkb
-
-28	Consortium (2012) 
-https://doi.org/bg9d
-
-29	Kapoor (2019) 
-https://doi.org/grgrkc
-
-30	Lopacinski (2021) 
-https://doi.org/gnt97c
-
-31	Oldershaw (2019) 
-https://doi.org/jp47
-
-32	Oldershaw (2022) 
-https://doi.org/grgrwr
-
-33	Mosqueira (2018) 
-https://doi.org/gmjm5q
-
-34	Karbassi (2020) 
-https://doi.org/ghdzv6
+2 XXXX https://doi.org/10.3390/nano12040683
+http://shortdoi.org/10.3390/nano12040683?format=json
+https://doi.org/grgtkz
