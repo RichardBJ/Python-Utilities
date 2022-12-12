@@ -3,35 +3,32 @@
 3	Zhdanova, I. V. et al. Aging of intrinsic circadian rhythms and sleep in a diurnal nonhuman primate, Macaca mulatta. J Biol Rhythms 26, 149-159 (2011). https://doi.org:10.1177/0748730410395849
 4	Skene, D. J. & Swaab, D. F. Melatonin rhythmicity: effect of age and Alzheimer's disease. Exp Gerontol 38, 199-206 (2003). https://doi.org:10.1016/s0531-5565(02)00198-5
 5	Nunn, N., Womack, M., Dart, C. & Barrett-Jolley, R. Function and pharmacology of spinally-projecting sympathetic pre-autonomic neurones in the paraventricular nucleus of the hypothalamus. Current neuropharmacology 9, 262-277 (2011). https://doi.org:10.2174/157015911795596531
-6	Feetham, C. H. & Barrett-Jolley, R. NK1-receptor-expressing paraventricular nucleus neurones modulate daily variation in heart rate and stress-induced changes in heart rate variability. Physiol Rep 2 (2014). https://doi.org:10.14814/phy2.12207
-7	Kiss, J., Martos, J. & Palkovits, M. Hypothalamic paraventricular nucleus: a quantitative analysis of cytoarchitectonic subdivisions in the rat. The Journal of Comparative Neurology 313, 563-573 (1991). 
+6	Kiss, J., Martos, J. & Palkovits, M. Hypothalamic paraventricular nucleus: a quantitative analysis of cytoarchitectonic subdivisions in the rat. The Journal of Comparative Neurology 313, 563-573 (1991). https://doi.org:10.1002/cne.903130403
+7	Feetham, C. H. & Barrett-Jolley, R. NK1-receptor-expressing paraventricular nucleus neurones modulate daily variation in heart rate and stress-induced changes in heart rate variability. Physiol Rep 2 (2014). https://doi.org:10.14814/phy2.12207
 8	Womack, M. D., Morris, R., Gent, T. C. & Barrett-Jolley, R. Substance P targets sympathetic control neurons in the paraventricular nucleus. Circ Res 100, 1650-1658 (2007). https://doi.org:10.1161/CIRCRESAHA.107.153494
 9	Nunn, N., Feetham, C. H., Martin, J., Barrett-Jolley, R. & Plagge, A. Elevated blood pressure, heart rate and body temperature in mice lacking the XLαs protein of the Gnas locus is due to increased sympathetic tone. Exp Physiol 98, 1432–1445 (2013). https://doi.org:10.1113/expphysiol.2013.073064
 10	Feetham, C. H., Nunn, N. & Barrett-Jolley, R. The depressor response to intracerebroventricular hypotonic saline is sensitive to TRPV4 antagonist RN1734. Front Pharmacol 6, 83 (2015). https://doi.org:10.3389/fphar.2015.00083
 11	Feetham, C. H., Nunn, N., Lewis, R., Dart, C. & Barrett-Jolley, R. TRPV4 and KCa ion channels functionally couple as osmosensors in the paraventricular nucleus. Br J Pharmacol 172, 1753-1768 (2015). https://doi.org:10.1111/bph.13023
-12	Feetham, C., Nunn, N. & Barrett-Jolley, R. TRPV4 in the Paraventricular Nucleus of the Hypothalamus - A role for osmosensing. Proceedings of the Physiological Society 37, SA012 (2016). 
-13	O'Brien, F., Feetham, C., Staunton, C. A., Hext, K. & Barrett-Jolley, R. Temperature modulates PVN pre-sympathetic neurones via transient receptor potential ion channels. Currently under-review. Preprint here: https://www.biorxiv.org/content/10.1101/2022.01.26.477880v1.full (2022). 
-14	Abe, M. et al. Circadian rhythms in isolated brain regions. J Neurosci 22, 350-356 (2002). 
-15	Mieda, M., Williams, S. C., Richardson, J. A., Tanaka, K. & Yanagisawa, M. The dorsomedial hypothalamic nucleus as a putative food-entrainable circadian pacemaker. PNAS 103, 12150-12155 (2006). https://doi.org:10.1073/pnas.0604189103
-16	Barrett-Jolley, R., Pyner, S. & Coote, J. H. Measurement of voltage-gated potassium currents in identified spinally-projecting sympathetic neurones of the paraventricular nucleus. J Neurosci Met 102, 25-33 (2000). https://doi.org:10.1016/S0165-0270(00)00271-5
-17	Womack, M. D., Pyner, S. & Barrett-Jolley, R. Inhibition by alpha-tetrahydrodeoxycorticosterone (THDOC) of pre-sympathetic parvocellular neurones in the paraventricular nucleus of rat hypothalamus. Brit J Pharmacol 149, 600-607 (2006). https://doi.org:10.1038/sj.bjp.0706911
-18	Chuong, A. S. et al. Noninvasive optical inhibition with a red-shifted microbial rhodopsin. Nat Neurosci 17, 1123-1129 (2014). https://doi.org:10.1038/nn.3752
-19	Moskon, M. CosinorPy: a python package for cosinor-based rhythmometry. BMC Bioinformatics 21, 485 (2020). https://doi.org:10.1186/s12859-020-03830-w
-20	Celik, N. et al. DeepGANnel: Synthesis of fully annotated single molecule patch-clamp data using generative adversarial networks. BioRxiv (subm Front Neuroinfo) 10.1101/2020.06.25.171918 (2020). https://doi.org:10.1101/2020.06.25.171918
-21	Celik, N. et al. Deep-Channel uses deep neural networks to detect single-molecule events from patch-clamp data. Nature Commun Biol 3, 3 (2020). https://doi.org:10.1038/s42003-019-0729-3
-22	Martinac, B., Saimi, Y. & Kung, C. Ion channels in microbes. Physiol Rev 88, 1449-1490 (2008). https://doi.org:10.1152/physrev.00005.2008
-23	Doyle, D. A. et al. The structure of the potassium channel: Molecular basis of K+ conduction and selectivity. Science 280, 69-77 (1998). 
-24	Prindle, A. et al. Ion channels enable electrical communication in bacterial communities. Nature 527, 59–63 (2015). https://doi.org:10.1038/nature15709
-25	Costerton, J. W., Stewart, P. S. & Greenberg, E. P. Bacterial biofilms: a common cause of persistent infections. Science 284, 1318-1322 (1999). 
-26	Masi, E. et al. Electrical spiking in bacterial biofilms. J R Soc Interface 12, 20141036 (2015). https://doi.org:10.1098/rsif.2014.1036
-27	Noma, A. Atp-Regulated K+ Channels in Cardiac-Muscle. Nature 305, 147-148 (1983). 
-28	Lam, C. K. et al. Identifying the Transcriptome Signatures of Calcium Channel Blockers in Human Induced Pluripotent Stem Cell-Derived Cardiomyocytes. Circ Res 125, 212-222 (2019). https://doi.org:10.1161/CIRCRESAHA.118.314202
-29	Consortium, E. P. An integrated encyclopedia of DNA elements in the human genome. Nature 489, 57-74 (2012). https://doi.org:10.1038/nature11247
-30	Kapoor, A. et al. Multiple SCN5A variant enhancers modulate its cardiac gene expression and the QT interval. Proc Natl Acad Sci U S A 116, 10636-10645 (2019). https://doi.org:10.1073/pnas.1808734116
-31	Lopacinski, A. B. et al. Modeling the complete kinetics of coxsackievirus B3 reveals human determinants of host-cell feedback. Cell Syst 12, 304-323 e313 (2021). https://doi.org:10.1016/j.cels.2021.02.004
-32	Oldershaw, R. et al. Human Cardiac-Mesenchymal Stem Cell-Like Cells, a Novel Cell Population with Therapeutic Potential. Stem Cells Dev 28, 593-607 (2019). https://doi.org:10.1089/scd.2018.0170
-33	Oldershaw, R. A. et al. Cardiac Mesenchymal Stem Cell-like Cells Derived from a Young Patient with Bicuspid Aortic Valve Disease Have a Prematurely Aged Phenotype. Biomedicines 10, 3143 (2022). 
-34	Mosqueira, D. et al. CRISPR/Cas9 editing in human pluripotent stem cell-cardiomyocytes highlights arrhythmias, hypocontractility, and energy depletion as potential therapeutic targets for hypertrophic cardiomyopathy. Eur Heart J 39, 3879-3892 (2018). https://doi.org:10.1093/eurheartj/ehy249
-35	Karbassi, E. et al. Cardiomyocyte maturation: advances in knowledge and implications for regenerative medicine. Nat Rev Cardiol 17, 341-359 (2020). https://doi.org:10.1038/s41569-019-0331-x
-
-
+12	O'Brien, F., Feetham, C., Staunton, C. A., Hext, K. & Barrett-Jolley, R. Temperature modulates PVN pre-sympathetic neurones via transient receptor potential ion channels. Under-review Preprint here: (2022). https://doi.org:10.1101/2022.01.26.477880
+13	Abe, M. et al. Circadian rhythms in isolated brain regions. J Neurosci 22, 350-356 (2002). https://doi.org:10.1523/JNEUROSCI.22-01-00350.2002
+14	Mieda, M., Williams, S. C., Richardson, J. A., Tanaka, K. & Yanagisawa, M. The dorsomedial hypothalamic nucleus as a putative food-entrainable circadian pacemaker. PNAS 103, 12150-12155 (2006). https://doi.org:10.1073/pnas.0604189103
+15	Barrett-Jolley, R., Pyner, S. & Coote, J. H. Measurement of voltage-gated potassium currents in identified spinally-projecting sympathetic neurones of the paraventricular nucleus. J Neurosci Met 102, 25-33 (2000). https://doi.org:10.1016/S0165-0270(00)00271-5
+16	Womack, M. D., Pyner, S. & Barrett-Jolley, R. Inhibition by alpha-tetrahydrodeoxycorticosterone (THDOC) of pre-sympathetic parvocellular neurones in the paraventricular nucleus of rat hypothalamus. Brit J Pharmacol 149, 600-607 (2006). https://doi.org:10.1038/sj.bjp.0706911
+17	Chuong, A. S. et al. Noninvasive optical inhibition with a red-shifted microbial rhodopsin. Nat Neurosci 17, 1123-1129 (2014). https://doi.org:10.1038/nn.3752
+18	Moskon, M. CosinorPy: a python package for cosinor-based rhythmometry. BMC Bioinformatics 21, 485 (2020). https://doi.org:10.1186/s12859-020-03830-w
+19	Celik, N. et al. Deep-Channel uses deep neural networks to detect single-molecule events from patch-clamp data. Nature Commun Biol 3, 3 (2020). https://doi.org:10.1038/s42003-019-0729-3
+20	Ball, S. T. M. et al. DeepGANnel: Synthesis of fully annotated single molecule patch-clamp data using generative adversarial networks. PLoS One 17, e0267452 (2022). https://doi.org:10.1371/journal.pone.0267452
+21	Martinac, B., Saimi, Y. & Kung, C. Ion channels in microbes. Physiol Rev 88, 1449-1490 (2008). https://doi.org:10.1152/physrev.00005.2008
+22	Doyle, D. A. et al. The structure of the potassium channel: Molecular basis of K+ conduction and selectivity. Science 280, 69-77 (1998). https://doi.org:10.1126/science.280.5360.69
+23	Prindle, A. et al. Ion channels enable electrical communication in bacterial communities. Nature 527, 59–63 (2015). https://doi.org:10.1038/nature15709
+24	Costerton, J. W., Stewart, P. S. & Greenberg, E. P. Bacterial biofilms: a common cause of persistent infections. Science 284, 1318-1322 (1999). https://doi.org:10.1126/science.284.5418.1318
+25	Masi, E. et al. Electrical spiking in bacterial biofilms. J R Soc Interface 12, 20141036 (2015). https://doi.org:10.1098/rsif.2014.1036
+26	Noma, A. Atp-Regulated K+ Channels in Cardiac-Muscle. Nature 305, 147-148 (1983). https://doi.org:10.1038/305147a0
+27	Lam, C. K. et al. Identifying the Transcriptome Signatures of Calcium Channel Blockers in Human Induced Pluripotent Stem Cell-Derived Cardiomyocytes. Circ Res 125, 212-222 (2019). https://doi.org:10.1161/CIRCRESAHA.118.314202
+28	Consortium, E. P. An integrated encyclopedia of DNA elements in the human genome. Nature 489, 57-74 (2012). https://doi.org:10.1038/nature11247
+29	Kapoor, A. et al. Multiple SCN5A variant enhancers modulate its cardiac gene expression and the QT interval. Proc Natl Acad Sci U S A 116, 10636-10645 (2019). https://doi.org:10.1073/pnas.1808734116
+30	Lopacinski, A. B. et al. Modeling the complete kinetics of coxsackievirus B3 reveals human determinants of host-cell feedback. Cell Syst 12, 304-323 e313 (2021). https://doi.org:10.1016/j.cels.2021.02.004
+31	Oldershaw, R. et al. Human Cardiac-Mesenchymal Stem Cell-Like Cells, a Novel Cell Population with Therapeutic Potential. Stem Cells Dev 28, 593-607 (2019). https://doi.org:10.1089/scd.2018.0170
+32	Oldershaw, R. A. et al. Cardiac Mesenchymal Stem Cell-like Cells Derived from a Young Patient with Bicuspid Aortic Valve Disease Have a Prematurely Aged Phenotype. Biomedicines 10, 3143 (2022). https://doi.org:10.3390/biomedicines10123143
+33	Mosqueira, D. et al. CRISPR/Cas9 editing in human pluripotent stem cell-cardiomyocytes highlights arrhythmias, hypocontractility, and energy depletion as potential therapeutic targets for hypertrophic cardiomyopathy. European heart journal 39, 3879-3892 (2018). https://doi.org:10.1093/eurheartj/ehy249
+34	Karbassi, E. et al. Cardiomyocyte maturation: advances in knowledge and implications for regenerative medicine. Nat Rev Cardiol 17, 341-359 (2020). https://doi.org:10.1038/s41569-019-0331-x
