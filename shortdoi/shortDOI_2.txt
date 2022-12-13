@@ -1,49 +1,81 @@
 
 
-1 XXXX https://doi.org/10.1038/35006031
-http://shortdoi.org/10.1038/35006031?format=json
-https://doi.org/cppkk7
+1	Koh (2006) https://doi.org/br78vp
 
-2 XXXX https://doi.org/10.1038/nchem.295
-http://shortdoi.org/10.1038/nchem.295?format=json
-https://doi.org/fsq3dc
+2	Froy (2011) https://doi.org/fn6ngq
 
-3 XXXX https://doi.org/10.1038/nmat2403
-http://shortdoi.org/10.1038/nmat2403?format=json
-https://doi.org/bmw9jq
+3	Zhdanova (2011) https://doi.org/c4t9gr
 
-2 XXXX https://doi.org/10.1021/ja202986s
-http://shortdoi.org/10.1021/ja202986s?format=json
-https://doi.org/cmt6ft
+4	Skene (2003) https://doi.org/bcxtmw
 
-2 XXXX https://doi.org/10.1038/s41598-017-05693-3
-http://shortdoi.org/10.1038/s41598-017-05693-3?format=json
-https://doi.org/gbpvdp
+5	Womack (2007) https://doi.org/fdv48x
 
-2 XXXX https://doi.org/10.3390/nano12040683
-http://shortdoi.org/10.3390/nano12040683?format=json
-https://doi.org/grgtkz
+6	Nunn (2011) https://doi.org/bsvv2n
 
-1 XXXX https://doi.org/10.1038/35006031
-http://shortdoi.org/10.1038/35006031?format=json
-https://doi.org/cppkk7
+7	Nunn (2013) https://doi.org/f5b7mh
 
-2 XXXX https://doi.org/10.1038/nchem.295
-http://shortdoi.org/10.1038/nchem.295?format=json
-https://doi.org/fsq3dc
+8	Feetham (2015) https://doi.org/jp4s
 
-3 XXXX https://doi.org/10.1038/nmat2403
-http://shortdoi.org/10.1038/nmat2403?format=json
-https://doi.org/bmw9jq
+9	Feetham (2015) https://doi.org/f6588b
 
-2 XXXX https://doi.org/10.1021/ja202986s
-http://shortdoi.org/10.1021/ja202986s?format=json
-https://doi.org/cmt6ft
+10	Feetham (2014) https://doi.org/jp4r
 
-2 XXXX https://doi.org/10.1038/s41598-017-05693-3
-http://shortdoi.org/10.1038/s41598-017-05693-3?format=json
-https://doi.org/gbpvdp
+11	O'Brien (2022) https://doi.org/jp4z
 
-2 XXXX https://doi.org/10.3390/nano12040683
-http://shortdoi.org/10.3390/nano12040683?format=json
-https://doi.org/grgtkz
+12	Kiss (1991) https://doi.org/bpzsvt
+
+13	Abe (2002) https://doi.org/ghxjdt
+
+14	Mieda (2006) https://doi.org/fb5qpp
+
+15	Barrett-Jolley (2000) https://doi.org/bzndxz
+
+16	Womack (2006) https://doi.org/bdkv93
+
+17	Chuong (2014) https://doi.org/f6bbnk
+
+18	Moskon (2020) https://doi.org/gqth36
+
+19	Celik (2020) https://doi.org/jp4v
+
+20	Ball (2022) https://doi.org/jp4w
+
+21	Noma (1983) https://doi.org/dtsd7f
+
+22	Lam (2019) https://doi.org/grgrkb
+
+23	Consortium (2012) https://doi.org/bg9d
+
+24	Kapoor (2019) https://doi.org/grgrkc
+
+25	Lopacinski (2021) https://doi.org/gnt97c
+
+26	Oldershaw (2019) https://doi.org/jp47
+
+27	Oldershaw (2022) https://doi.org/grgrwr
+
+28	Mosqueira (2018) https://doi.org/gmjm5q
+
+29	Karbassi (2020) https://doi.org/ghdzv6
+
+30	Reuten (2021) https://doi.org/gjdpmz
+
+31	Chavda (2022) https://doi.org/grgzkp
+
+32	Hamill (2009) https://doi.org/cvxf72
+
+33	Reuten (2016) https://doi.org/f9fc4q
+
+34	Sugden (2022) https://doi.org/grgzkq
+
+35	Song (2017) https://doi.org/gg4q33
+
+36	Martinac (2008) https://doi.org/c7c8gq
+
+37	Doyle (1998) https://doi.org/ff8wqd
+
+38	Prindle (2015) https://doi.org/f7w8ks
+
+39	Costerton (1999) https://doi.org/dt9xd5
+
+40	Masi (2015) https://doi.org/gnj2b9
