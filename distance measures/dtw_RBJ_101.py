@@ -5,7 +5,7 @@
 
 
 print("Running")
-
+#HEY THERE IS NOW A dtwparallel that works great.... MASSIVELY faster. Use instead.
 
 # In[152]:
 
