@@ -4,6 +4,7 @@ Created on Wed Feb 28 18:00:44 2024
 
 @author: rbj
 """
+import numpy as np
 import pandas as pd
 from tkinter import Tk, messagebox
 from tkinter.filedialog import askopenfilename, asksaveasfilename
@@ -38,10 +39,22 @@ if file_path:
     if convert:
         nc = df.shape[1]
         if nc == 3:
+            # Then we have Simple time format and wish to convert to Sam format
             df.columns = ["Time",  "Noisy Current", "Channels"]
+            df["State of Channel 0"] = df["Channels"]
         elif nc == 2:
+            # Then we have Simple format and need to convert to Sam
+            #IT COULD BE time and noisy current
+            # or Channel and noisy current. Infer this
             df.columns =["Time", "Noisy Current"]
+            if df["Time"].is_monotonic_increasing:
+                pass
+            else:
+                # If there is no time-base we must add it assuming a sample interval
+                df.columns =["Noisy Current", "Channels"]
+                df["Time"] = df['Time'] = np.arange(0, len(df)*50e-6, 50e-6)
         elif nc == 4:
+            # I guess we already have Sam format
             df.columns=df.columns
         else:
             print("Uknown file structure")
