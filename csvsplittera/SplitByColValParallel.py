@@ -17,6 +17,7 @@ from tkinter import simpledialog
 
 
 def split_dataframe(df, indices):
+    # Split the subset of data now by index.
     indices = sorted(indices)
     dfs = []
     start = 0
@@ -28,12 +29,12 @@ def split_dataframe(df, indices):
         dfs.append(df.iloc[start:])
     return dfs
 
-def split_csv_on_column_value(file_path, column_name, split_value):
+def split_csv_on_column_value(file_path, column_name, split_value, dead_time):
     # Read the CSV file
     df = pd.read_csv(file_path)
     df[column_name] = (df[column_name].round(-1)).astype(int)
     # Split the dataframe based on the split value and write to separate CSV files
-    subset_df = df[df[column_name] == split_value]
+    subset_df = df[df[column_name] == split_value].reset_index()
     subset_df["Interval"] = subset_df["Time"].diff().fillna(6)
     #.shift(-1).fillna(subset_df["Time"].min())
     indices = subset_df[subset_df['Interval'] > 0.01].index
@@ -51,7 +52,8 @@ def split_csv_on_column_value(file_path, column_name, split_value):
     # Move it to front
     col = new_df.pop("Time")
     new_df.insert(0,"Time",col)
-    # subset_df.loc[:, "Time"] = np.arange(0, len(subset_df) * average_interval, average_interval)
+    #crop off a leading deadtime
+    new_df=new_df[new_df.index > dead_time]
     new_df.to_csv(f"{file_path}_{split_value}.csv", index=False)
 
 def main():
@@ -62,10 +64,13 @@ def main():
     file_path = filedialog.askopenfilename()  # Show the file dialog
 
     # Ask the user for the split value
-    split_value = simpledialog.askinteger("Input", "Enter the split value")
+    split_value = simpledialog.askinteger("Input", "Split value")
+    # Ask the user for the top to chop
+    dead_time = simpledialog.askinteger("Input", "DeadPts")
 
     # Call the function to split the CSV file
-    split_csv_on_column_value(file_path, "Channel 1", split_value)
+    split_csv_on_column_value(file_path, "Channel 1",
+                              split_value, dead_time)
 
     root.destroy()
 
