@@ -8,7 +8,7 @@ Currently splitting on "Channel 1"
 Requires a time column called "Time"
 
 """
-
+import sys
 import numpy as np
 import pandas as pd
 from tkinter import filedialog
@@ -29,9 +29,12 @@ def split_dataframe(df, indices):
         dfs.append(df.iloc[start:])
     return dfs
 
-def split_csv_on_column_value(file_path, column_name, split_value, dead_time):
+def split_csv_on_column_value(file_path, column_name, split_value, dead_time, parquet):
     # Read the CSV file
-    df = pd.read_csv(file_path)
+    if parquet:
+        df = pd.read_parquet(file_path)
+    else:
+        df = pd.read_csv(file_path)
     df[column_name] = (df[column_name].round(-1)).astype(int)
     # Split the dataframe based on the split value and write to separate CSV files
     subset_df = df[df[column_name] == split_value].reset_index()
@@ -61,16 +64,21 @@ def main():
     root = Tk()
     root.withdraw()  # Hide the main window
     root.update()
-    file_path = filedialog.askopenfilename()  # Show the file dialog
+    file_paths = filedialog.askopenfilenames(filetypes=[("csv files", "*.csv"),("parquet files", "*.parquet") ])  # Show the file dialog
+    if file_paths == "":
+        sys.exit("No files")
 
     # Ask the user for the split value
     split_value = simpledialog.askinteger("Input", "Split value")
     # Ask the user for the top to chop
     dead_time = simpledialog.askinteger("Input", "DeadPts")
-
-    # Call the function to split the CSV file
-    split_csv_on_column_value(file_path, "Channel 1",
-                              split_value, dead_time)
+    for file_path in file_paths:
+        parquet = False
+        if "parquet" in file_path.lower():
+            parquet = True
+        # Call the function to split the CSV file
+        split_csv_on_column_value(file_path, "Channel 1",
+                                  split_value, dead_time, parquet)
 
     root.destroy()
 
