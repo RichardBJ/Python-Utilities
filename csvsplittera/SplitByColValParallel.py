@@ -30,9 +30,10 @@ def split_dataframe(df, indices):
     return dfs
 
 def split_csv_on_column_value(file_path, column_name, split_value, dead_time, parquet):
-    # Read the CSV file
+    # Read the CSV data
     if parquet:
         df = pd.read_parquet(file_path)
+
     else:
         df = pd.read_csv(file_path)
     df[column_name] = (df[column_name].round(-1)).astype(int)
@@ -57,7 +58,12 @@ def split_csv_on_column_value(file_path, column_name, split_value, dead_time, pa
     new_df.insert(0,"Time",col)
     #crop off a leading deadtime
     new_df=new_df[new_df.index > dead_time]
-    new_df.to_csv(f"{file_path}_{split_value}.csv", index=False)
+    if parquet:
+        fname=file_path.replace(".parquet","")
+    else:
+        fname=file_path.replace(".csv","")
+
+    new_df.to_csv(f"{fname}_{split_value}.csv", index=False)
 
 def main():
     # Create a GUI for file dialog
@@ -69,10 +75,11 @@ def main():
         sys.exit("No files")
 
     # Ask the user for the split value
-    split_value = simpledialog.askinteger("Input", "Split value")
+    split_value = simpledialog.askfloat("Input", "Split value", initialvalue=150)
     # Ask the user for the top to chop
     dead_time = simpledialog.askinteger("Input", "DeadPts")
     for file_path in file_paths:
+        print(file_path)
         parquet = False
         if "parquet" in file_path.lower():
             parquet = True
