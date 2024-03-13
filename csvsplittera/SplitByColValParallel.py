@@ -6,10 +6,16 @@ Created on Mon Mar 11 12:16:29 2024
 
 Currently splitting on "Channel 1"
 Requires a time column called "Time"
+Running with 262 PC, py3818 conda environment
+will hang if include a really tiny file!
+Another warning is this:
+
+ PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use newframe = frame.copy()
+
+new_df["Time"] = [i*average_interval for i in range(len(new_df))]
 
 """
 import sys
-import numpy as np
 import pandas as pd
 from tkinter import filedialog
 from tkinter import Tk
@@ -57,7 +63,7 @@ def split_csv_on_column_value(file_path, column_name, split_value, dead_time, pa
     col = new_df.pop("Time")
     new_df.insert(0,"Time",col)
     #crop off a leading deadtime
-    new_df=new_df[new_df.index > dead_time]
+    new_df=new_df[new_df["Time"] > dead_time]
     if parquet:
         fname=file_path.replace(".parquet","")
     else:
@@ -75,9 +81,9 @@ def main():
         sys.exit("No files")
 
     # Ask the user for the split value
-    split_value = simpledialog.askfloat("Input", "Split value", initialvalue=150)
+    split_value = simpledialog.askinteger("Input", "Split value", initialvalue=60)
     # Ask the user for the top to chop
-    dead_time = simpledialog.askinteger("Input", "DeadPts")
+    dead_time = simpledialog.askfloat("Input", "Dead Time (s)", initialvalue=0.05)
     for file_path in file_paths:
         print(file_path)
         parquet = False
