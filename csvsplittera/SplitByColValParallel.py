@@ -18,8 +18,12 @@ new_df["Time"] = [i*average_interval for i in range(len(new_df))]
 import sys
 import pandas as pd
 from tkinter import filedialog
-from tkinter import Tk
-from tkinter import simpledialog
+from tkinter import Tk, simpledialog, messagebox
+
+def Do_preprocess(data):
+    print("preprocessing")
+    return data
+    
 
 
 def split_dataframe(df, indices):
@@ -35,13 +39,14 @@ def split_dataframe(df, indices):
         dfs.append(df.iloc[start:])
     return dfs
 
-def split_csv_on_column_value(file_path, column_name, split_value, dead_time, parquet):
+def split_csv_on_column_value(file_path, column_name, split_value, dead_time, 
+                              parquet, preprocess):
     # Read the CSV data
     if parquet:
         df = pd.read_parquet(file_path)
-
     else:
         df = pd.read_csv(file_path)
+        
     df[column_name] = (df[column_name].round(-1)).astype(int)
     # Split the dataframe based on the split value and write to separate CSV files
     subset_df = df[df[column_name] == split_value].reset_index()
@@ -49,6 +54,8 @@ def split_csv_on_column_value(file_path, column_name, split_value, dead_time, pa
     #.shift(-1).fillna(subset_df["Time"].min())
     indices = subset_df[subset_df['Interval'] > 0.01].index
     list_of_dfs = split_dataframe(subset_df, indices)
+    if preprocess:
+        list_of_dfs = Do_preprocess(list_of_dfs)
     new_df = pd.DataFrame()
 
     for idx, idf in enumerate(list_of_dfs):
@@ -76,14 +83,19 @@ def main():
     root = Tk()
     root.withdraw()  # Hide the main window
     root.update()
-    file_paths = filedialog.askopenfilenames(filetypes=[("csv files", "*.csv"),("parquet files", "*.parquet") ])  # Show the file dialog
+    file_paths = filedialog.askopenfilenames(filetypes=[("parquet files", "*.parquet"),("csv files", "*.csv")])  # Show the file dialog
     if file_paths == "":
         sys.exit("No files")
 
     # Ask the user for the split value
     split_value = simpledialog.askinteger("Input", "Split value", initialvalue=60)
+    root.update()
     # Ask the user for the top to chop
     dead_time = simpledialog.askfloat("Input", "Dead Time (s)", initialvalue=0.05)
+    root.update()
+    print(f'Dead time is {dead_time}s')
+    preprocess = messagebox.askyesno("Question", "Preprocess?")
+    root.update()
     for file_path in file_paths:
         print(file_path)
         parquet = False
@@ -91,7 +103,7 @@ def main():
             parquet = True
         # Call the function to split the CSV file
         split_csv_on_column_value(file_path, "Channel 1",
-                                  split_value, dead_time, parquet)
+                                  split_value, dead_time, parquet, preprocess)
 
     root.destroy()
 
