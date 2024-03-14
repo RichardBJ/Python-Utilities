@@ -9,6 +9,8 @@ Created on Wed Feb 28 18:00:44 2024
 Created on Wed Feb 28 18:00:44 2024
 
 @author: rbj
+Will read parquet files and allow you to probe the dataset
+or even save to a CSV
 """
 
 import numpy as np

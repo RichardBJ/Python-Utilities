@@ -3,6 +3,7 @@
 Created on Wed Feb 28 17:56:28 2024
 SIMPLE CONVERSION between parquet and csv
 @author: rbj
+straight forward conversion to and from parquet and csv
 """
 
 import pandas as pd
