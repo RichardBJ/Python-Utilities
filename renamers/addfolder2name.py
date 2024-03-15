@@ -20,10 +20,11 @@ def rename_files_in_subfolders(parent_directory):
             parent_folder_name = folders[-2]
             folder_name = folders[-1]
             for filename in filenames:
-                new_filename = f"{parent_folder_name}_{folder_name}_{filename}"
-                old_file_path = os.path.join(dirpath, filename)
-                new_file_path = os.path.join(dirpath, new_filename)
-                os.rename(old_file_path, new_file_path)
+                if "parquet" in filename:
+                    new_filename = f"{parent_folder_name}_{folder_name}_{filename}"
+                    old_file_path = os.path.join(dirpath, filename)
+                    new_file_path = os.path.join(dirpath, new_filename)
+                    os.rename(old_file_path, new_file_path)
 
 def select_directory():
     root = tk.Tk()
