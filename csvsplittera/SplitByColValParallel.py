@@ -19,13 +19,52 @@ import sys
 import pandas as pd
 from tkinter import filedialog
 from tkinter import Tk, simpledialog, messagebox
+from scipy.signal import butter, filtfilt
 
-def Do_preprocess(data):
+# Define the filter
+def butter_lowpass(cutoff, fs, order=5):
+    nyq = 0.5 * fs
+    normal_cutoff = cutoff / nyq
+    b, a = butter(order, normal_cutoff, btype='low', analog=False)
+    return b, a
+
+def butter_lowpass_filter(data, cutoff, fs, order=5):
+    b, a = butter_lowpass(cutoff, fs, order=order)
+    y = filtfilt(b, a, data)
+    return y
+
+# Parameters
+order = 6
+cutoff = 1000.0   # desired cutoff frequency of the filter, Hz
+
+
+
+def Do_preprocess(dataIn, column="Channel 0"):
     print("preprocessing")
-    return data
+    dataOut = []
+    for df in dataIn:
+        if len(df)>100:
+            df = df.reset_index(drop=True)
+            mean = df[column].mean()
+            sd = df[column].std()
     
-
-
+            # Identify outliers
+            outliers = df[column] > mean + 6 * sd
+    
+            # Replace outliers with mean
+            df.loc[outliers, column] = mean
+            # Assuming 'df' is your DataFrame and 'column' is the column of interest
+            fs = 1 / ((df['Time'][10] - df['Time'][0])/10)  # calculate the sample rate
+            print(fs)
+            # Get the filter coefficients 
+            b, a = butter_lowpass(cutoff, fs, order)
+    
+            # Assuming 'df' is your DataFrame and 'column' is the column of interest
+            df.loc[:, column] = butter_lowpass_filter(df[column], cutoff, fs, order)
+            dataOut.append(df)
+        
+    return dataOut
+    
 def split_dataframe(df, indices):
     # Split the subset of data now by index.
     indices = sorted(indices)
