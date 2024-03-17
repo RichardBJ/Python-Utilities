@@ -53,6 +53,7 @@ def Do_preprocess(dataIn, column="Channel 0"):
     
             # Replace outliers with mean
             df.loc[outliers, column] = mean
+            
             # Assuming 'df' is your DataFrame and 'column' is the column of interest
             fs = 1 / ((df['Time'][10] - df['Time'][0])/10)  # calculate the sample rate
             print(fs)
