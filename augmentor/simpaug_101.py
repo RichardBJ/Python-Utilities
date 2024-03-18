@@ -16,6 +16,7 @@ USESCIPY = True
 
 def augment_dataframe(file, df, num_copies):
     # Process each desired copy
+    print(f"Processing {file}")
     for i in range(1, num_copies + 1):
         # resample first
         # Create a new index with double the length (upsampling by a factor of 2)
@@ -28,7 +29,7 @@ def augment_dataframe(file, df, num_copies):
             # Interpolate or fill missing values (e.g., using linear interpolation)
             df = upsampled_signal.interpolate(method='linear')    
         else:
-            factor = np.random.uniform(-5, 5)
+            factor = np.random.uniform(0.2, 5)
             nTime = np.linspace(0, max(df["Time"]), 
                 int(len(df)*factor), endpoint=True)
             # Create a new DataFrame to hold resampled data
@@ -36,17 +37,21 @@ def augment_dataframe(file, df, num_copies):
             
             # Resample each column
             for column in df.columns:
-                resampled_data = signal.resample(df[column], len(nTime))
-                aug_df[column] = resampled_data
+               if df[column].dtypes == 'object':
+                   aug_df[column] = ["C0"]*len(nTime)
+               else:
+                   resampled_data = signal.resample(df[column], len(nTime))
+                   aug_df[column] = resampled_data
+        aug_df["Channels"] = aug_df["Channels"].astype(int)
         aug_df["Time"] = nTime    
         # Modify the 'Channel 0' column (replace with your actual augmentation logic)
         # For example, let's multiply the values by different factors
         # Generate random numbers between -0.1 and +0.1
-        mean = df["Channel 0"].mean()
+        mean = df["Noisy Current"].mean()
         random_values = np.random.uniform(low=-0.01*mean, high=0.01*mean, size=len(aug_df))
         
         # Add the random values to the 'Channel 0' column
-        aug_df["Channel 0"] += random_values
+        aug_df["Noisy Current"] += random_values
           
         newfile = file.replace(".parquet","")
         # Save the modified DataFrame to a new Parquet file
@@ -70,7 +75,8 @@ def process_and_save_selected_dataframes():
         return
     
     # Process each selected Parquet file
-    for selected_file in selected_files:
+    for j, selected_file in enumerate(selected_files):
+        print(f"Processing file {j} of {len(selected_files)}")
         filename = os.path.basename(selected_file)
         try:
             # Read the selected Parquet file into a pandas DataFrame
