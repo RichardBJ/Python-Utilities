@@ -16,7 +16,7 @@ or even save to a CSV
 import numpy as np
 import pandas as pd
 from tkinter import Tk, messagebox
-from tkinter.filedialog import askopenfilenames, asksaveasfilename
+from tkinter.filedialog import askopenfilenames
 
 # Create the root Tk window
 root = Tk()
