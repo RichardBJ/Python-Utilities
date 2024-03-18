@@ -42,7 +42,11 @@ def augment_dataframe(file, df, num_copies):
                else:
                    resampled_data = signal.resample(df[column], len(nTime))
                    aug_df[column] = resampled_data
+        #  Dont let the min or max of the Channels column change!
         aug_df["Channels"] = aug_df["Channels"].astype(int)
+        low = df["Channels"].min()
+        hi = df["Channels"].max()
+        aug_df["Channels"] = np.clip(aug_df["Channels"], low, hi)
         aug_df["Time"] = nTime    
         # Modify the 'Channel 0' column (replace with your actual augmentation logic)
         # For example, let's multiply the values by different factors
@@ -76,7 +80,7 @@ def process_and_save_selected_dataframes():
     
     # Process each selected Parquet file
     for j, selected_file in enumerate(selected_files):
-        print(f"Processing file {j} of {len(selected_files)}")
+        print(f"Processing file {j+1} of {len(selected_files)}")
         filename = os.path.basename(selected_file)
         try:
             # Read the selected Parquet file into a pandas DataFrame
