@@ -1,13 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Wed Feb 28 18:00:44 2024
-
-@author: rbj
-"""
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Feb 28 18:00:44 2024
-
 @author: rbj
 Will read parquet files and allow you to probe the dataset
 or even save to a CSV
@@ -15,11 +8,15 @@ or even save to a CSV
 
 import numpy as np
 import pandas as pd
-from tkinter import Tk, messagebox
+import tkinter as tk
+from tkinter import messagebox
 from tkinter.filedialog import askopenfilenames
 
 # Create the root Tk window
-root = Tk()
+root = tk.Tk()
+
+# Update the root window to ensure proper initialization on macOS
+root.update()
 
 # Hide the root Tk window
 root.withdraw()
@@ -43,43 +40,44 @@ if file_paths:
         elif file_path.endswith('.parquet'):
             # Read the Parquet file with pandas
             df = pd.read_parquet(file_path)
+
         print(file_path)
         print(df.info())
         print(df.head())
-        
+
         if convert:
             nc = df.shape[1]
             if nc == 3:
                 # Then we have Simple time format and wish to convert to Sam format
-                df.columns = ["Time",  "Noisy Current", "Channels"]
+                df.columns = ["Time", "Noisy Current", "Channels"]
                 df['State of Channel 0'] = df.apply(
                     lambda row: f"C{int(row['Channels'])}" if row['Channels'] == 0 else f"O{int(row['Channels'])}",
                     axis=1
-                )            
+                )
             elif nc == 2:
                 # Then we have Simple format and need to convert to Sam
-                #IT COULD BE time and noisy current
+                # IT COULD BE time and noisy current
                 # or Channel and noisy current. Infer this
                 # So to clarify this may be unlabelled real data...
-                df.columns =["Time", "Noisy Current"]
+                df.columns = ["Time", "Noisy Current"]
                 if df["Time"].is_monotonic_increasing:
                     pass
                 else:
                     # If there is no time-base we must add it assuming a sample interval
-                    df.columns =["Noisy Current", "Channels"]
-                    df["Time"] = df['Time'] = np.arange(0, len(df)*50e-6, 50e-6)
+                    df.columns = ["Noisy Current", "Channels"]
+                    df["Time"] = df['Time'] = np.arange(0, len(df) * 50e-6, 50e-6)
             elif nc == 4:
                 # I guess we already have Sam format
-                df.columns=df.columns
+                df.columns = df.columns
             else:
-                print("Uknown file structure")
+                print("Unknown file structure")
                 print(file_path)
                 exit()
-            
+
             if file_path.endswith('.csv'):
-                save_path = file_path.replace('.csv','.parquet')
+                save_path = file_path.replace('.csv', '.parquet')
             else:
-                save_path = file_path.replace('.parquwt','.csv')
+                save_path = file_path.replace('.parquet', '.csv')
 
             if save_path:
                 # Determine the desired output format
@@ -98,3 +96,8 @@ if file_paths:
 else:
     print("No file selected.")
 
+# Quit the Tkinter event loop
+root.quit()
+
+# Destroy the Tkinter window
+root.destroy()
