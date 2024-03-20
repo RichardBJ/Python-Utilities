@@ -8,7 +8,7 @@ import os
 import tkinter as tk
 from tkinter import filedialog
 
-REPLACE = "generated_data_mixed_data_mixed_data_"
+REPLACE = "generated_data_mixed_"
 
 def rename_files_in_subfolders(parent_directory):
     for dirpath, dirnames, filenames in os.walk(parent_directory):
