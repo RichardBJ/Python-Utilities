@@ -5,13 +5,14 @@ Created on Sat Mar 23 16:19:49 2024
 @author: rbj
 """
 import sys
-from PyQt5.QtWidgets import QApplication, QVBoxLayout, QWidget
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from PyQt5.QtWidgets import QApplication, QVBoxLayout, QWidget, QSlider, QLabel
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas, NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 import numpy as np
 import pandas as pd
 import tkinter as tk
 from tkinter.filedialog import askopenfilename
+from PyQt5.QtCore import Qt
 
 class MplCanvas(FigureCanvas):
     def __init__(self, parent=None):
@@ -34,18 +35,47 @@ class ApplicationWindow(QWidget):
         # Create a vertical box layout and add the canvas
         vbox = QVBoxLayout()
         vbox.addWidget(self.canvas)
+
+        # Add navigation toolbar for zooming and panning
+        self.toolbar = NavigationToolbar(self.canvas, self)
+        vbox.addWidget(self.toolbar)
+
+        # Add a horizontal scrollbar
+        self.scrollbar = QSlider(Qt.Horizontal)
+        self.scrollbar.setMinimum(0)
+        self.scrollbar.setMaximum(len(df) - 1)
+        self.scrollbar.valueChanged.connect(self.update_plot)
+        vbox.addWidget(QLabel("Scroll:"))
+        vbox.addWidget(self.scrollbar)
+
+        # Add a window width slider
+        self.window_slider = QSlider(Qt.Horizontal)
+        self.window_slider.setMinimum(1)
+        self.window_slider.setMaximum(len(df))
+        self.window_slider.setValue(1000)
+        self.window_slider.valueChanged.connect(self.update_plot)
+        vbox.addWidget(QLabel("Window width:"))
+        vbox.addWidget(self.window_slider)
+
         self.setLayout(vbox)
 
         # Draw the initial plot
         self.draw_plot()
 
     def draw_plot(self):
+        # Store the current x-axis limits
+        xlim = self.canvas.axes.get_xlim() if self.canvas.axes.get_xlim() != (0, 1) else (0, 1000)
+
         # Clear the canvas
         self.canvas.axes.clear()
 
         # Plot the signal and the threshold
         self.canvas.axes.plot(self.df[self.signal_column], 'b')
         self.canvas.axes.plot(self.df['Thresholded Signal'], 'r')
+        self.canvas.axes.axhline(y=self.threshold, color='g')  # Draw the actual threshold in green
+
+        # Restore the x-axis limits
+        self.canvas.axes.set_xlim(xlim)
 
         # Redraw the canvas
         self.canvas.draw()
@@ -57,6 +87,13 @@ class ApplicationWindow(QWidget):
 
         # Redraw the plot with the new threshold
         self.draw_plot()
+
+    def update_plot(self, value):
+        # Update the plot based on the scrollbar position and window width
+        start = self.scrollbar.value()
+        window_width = self.window_slider.value()
+        self.canvas.axes.set_xlim(start, start + window_width)
+        self.canvas.draw()
 
 def main():
     # Use tkinter to get the filename
