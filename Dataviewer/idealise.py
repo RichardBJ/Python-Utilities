@@ -27,6 +27,7 @@ class ApplicationWindow(QWidget):
         self.signal_column = signal_column
         self.threshold = df[signal_column].median()  # Initial threshold
         self.df['Thresholded Signal'] = np.where(self.df[self.signal_column] > self.threshold, 1, 0)
+        self.inflection_points = [(0, self.threshold)]
 
         # Create the matplotlib FigureCanvas object
         self.canvas = MplCanvas(self)
@@ -72,7 +73,10 @@ class ApplicationWindow(QWidget):
         # Plot the signal and the threshold
         self.canvas.axes.plot(self.df[self.signal_column], 'b')
         self.canvas.axes.plot(self.df['Thresholded Signal'], 'r')
-        self.canvas.axes.axhline(y=self.threshold, color='g')  # Draw the actual threshold in green
+        for i in range(len(self.inflection_points) - 1):
+            x1, y1 = self.inflection_points[i]
+            x2, y2 = self.inflection_points[i + 1]
+            self.canvas.axes.plot([x1, x2], [y1, y2], color='g')  # Draw the actual threshold in green
 
         # Restore the x-axis limits
         self.canvas.axes.set_xlim(xlim)
@@ -83,7 +87,16 @@ class ApplicationWindow(QWidget):
     def onclick(self, event):
         # Update the threshold with the y-coordinate of the click
         self.threshold = event.ydata
-        self.df['Thresholded Signal'] = np.where(self.df[self.signal_column] > self.threshold, 1, 0)
+
+        # Add an inflection point at the x-coordinate of the click
+        self.inflection_points.append((event.xdata, self.threshold))
+        self.inflection_points.sort()  # Ensure the inflection points are in order
+
+        # Update the thresholded signal based on the new inflection points
+        for i in range(len(self.inflection_points) - 1):
+            x1, y1 = self.inflection_points[i]
+            x2, y2 = self.inflection_points[i + 1]
+            self.df.loc[(self.df.index >= x1) & (self.df.index < x2), 'Thresholded Signal'] = np.where(self.df.loc[(self.df.index >= x1) & (self.df.index < x2), self.signal_column] >= y1, 1, 0)
 
         # Redraw the plot with the new threshold
         self.draw_plot()
