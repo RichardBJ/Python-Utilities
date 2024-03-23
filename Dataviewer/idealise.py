@@ -77,7 +77,8 @@ class ApplicationWindow(QWidget):
             x1, y1 = self.inflection_points[i]
             x2, y2 = self.inflection_points[i + 1]
             self.canvas.axes.plot([x1, x2], [y1, y2], color='g')  # Draw the actual threshold in green
-
+            self.canvas.axes.plot(x1, y1, 'go', markersize=5)
+            self.canvas.axes.plot(x2, y2, 'go', markersize=5)
         # Restore the x-axis limits
         self.canvas.axes.set_xlim(xlim)
 
