@@ -132,7 +132,11 @@ def main():
     window.show()
 
     # Start the application
-    sys.exit(app.exec_())
+    app.exec_()
+
+    # Save the DataFrame with the new thresholded column to a new file
+    new_filename = filename.rsplit('.', 1)[0] + '_NEW.parquet'
+    df.to_parquet(new_filename)
 
 if __name__ == '__main__':
     main()
