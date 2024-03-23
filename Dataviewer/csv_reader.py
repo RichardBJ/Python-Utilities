@@ -5,9 +5,28 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import tkinter as tk
 from tkinter.filedialog import askopenfilename
 
+class MultiInputDialog(tk.simpledialog.Dialog):
+    def __init__(self, parent, title=None, field_names=None, initial_values=None):
+        self.field_names = field_names or []
+        self.initial_values = list(initial_values) if initial_values is not None else []
+        self.entries = []
+        tk.simpledialog.Dialog.__init__(self, parent, title)
+
+    def body(self, master):
+        for field_name, initial_value in zip(self.field_names, self.initial_values):
+            tk.Label(master, text=field_name).grid(row=len(self.entries))
+            entry = tk.Entry(master)
+            entry.insert(0, initial_value)
+            entry.grid(row=len(self.entries), column=1)
+            self.entries.append(entry)
+        return self.entries[0]
+
+    def apply(self):
+        self.result = [entry.get() for entry in self.entries]
+
 # Create the root window
 root = tk.Tk()
-root.title("ECG Viewer")
+root.title("csv viewer")
 
 # Open a file dialog to select the CSV file
 filename = askopenfilename(filetypes=[("CSV files", "*.csv"), 
@@ -22,8 +41,12 @@ elif "parquet" in filename.lower():
 else:
     df = pd.read_feather(filename)
 
-if "Time" not in df.columns:
-    df["Time"] = np.arange(0, len(df) * 0.005, len(df))
+# Get the column names from the user
+dialog = MultiInputDialog(root, "Input", ["Time column name", "Signal column name"], df.columns[:2])
+time_column, signal_column = dialog.result
+
+if time_column not in df.columns:
+    df[time_column] = np.arange(0, len(df) * 0.005, len(df))
 
 print(df.info())
 
@@ -36,9 +59,9 @@ canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 # Function to update the plot
 def update_plot(start, window_width):
     ax.clear()
-    ax.plot(df["Time"][start:start+window_width], df["Noisy Current"][start:start+window_width])
-    ax.set_xlabel('Time')
-    ax.set_ylabel('Signal')
+    ax.plot(df[time_column][start:start+window_width], df[signal_column][start:start+window_width])
+    ax.set_xlabel(time_column)
+    ax.set_ylabel(signal_column)
     canvas.draw()
 
 # Create Scale widgets
