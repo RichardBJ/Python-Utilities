@@ -10,6 +10,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import numpy as np
 import pandas as pd
+from scipy.stats import linregress
 import tkinter as tk
 from tkinter.filedialog import askopenfilename
 from PyQt5.QtCore import Qt
@@ -93,6 +94,19 @@ class ApplicationWindow(QWidget):
         self.canvas.axes.set_xlim(xlim)
         # Redraw the canvas
         self.canvas.draw()
+        
+    def calculate_regression_line(self):
+        x_values = [x for x, y in self.inflection_points]
+        y_values = [y for x, y in self.inflection_points]
+        slope, intercept, _, _, _ = linregress(x_values, y_values)
+        return slope, intercept
+
+    def update_thresholded_signal(self):
+        slope, intercept = self.calculate_regression_line()
+        for i in range(len(self.df)):
+            x = self.df.index[i]
+            threshold = slope * x + intercept
+            self.df.loc[x, self.threshed_col] = int(self.df.loc[x, self.signal_column] >= threshold)
 
     def onclick(self, event):
         # Check if the click is inside the axes
@@ -138,13 +152,14 @@ class ApplicationWindow(QWidget):
         if event.key == ' ':
             self.remove_inflection_point()
 
+    """ ORIGINAL VERSION
     def update_thresholded_signal(self):
         for i in range(len(self.inflection_points) - 1):
             x1, y1 = self.inflection_points[i]
             x2, y2 = self.inflection_points[i + 1]
             self.df.loc[(self.df.index >= x1) & (self.df.index < x2), self.threshed_col] = np.where(
                 self.df.loc[(self.df.index >= x1) & (self.df.index < x2), self.signal_column] >= y1, 1, 0)
-    
+    """
     def remove_inflection_point(self):
         if self.selected_inflection_index is not None:
             del self.inflection_points[self.point_index]
