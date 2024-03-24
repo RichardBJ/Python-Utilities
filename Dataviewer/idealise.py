@@ -28,11 +28,16 @@ class ApplicationWindow(QWidget):
         self.threshold = df[signal_column].median()  # Initial threshold
         self.df['Thresholded Signal'] = np.where(self.df[self.signal_column] > self.threshold, 1, 0)
         self.inflection_points = [(0, self.threshold)]
+        self.selected_inflection_index = None
+        self.point_index = None
 
         # Create the matplotlib FigureCanvas object
         self.canvas = MplCanvas(self)
+        self.canvas.setFocusPolicy(Qt.StrongFocus)
+        self.canvas.setFocus()  
         self.canvas.mpl_connect('button_press_event', self.onclick)
-
+        self.canvas.mpl_connect('key_press_event', self.on_key_press)
+        
         # Create a vertical box layout and add the canvas
         vbox = QVBoxLayout()
         vbox.addWidget(self.canvas)
@@ -66,10 +71,8 @@ class ApplicationWindow(QWidget):
     def draw_plot(self):
         # Store the current x-axis limits
         xlim = self.canvas.axes.get_xlim() if self.canvas.axes.get_xlim() != (0, 1) else (0, 1000)
-
         # Clear the canvas
         self.canvas.axes.clear()
-
         # Plot the signal and the threshold
         self.canvas.axes.plot(self.df[self.signal_column], 'b')
         self.canvas.axes.plot(self.df['Thresholded Signal'], 'r')
@@ -77,30 +80,77 @@ class ApplicationWindow(QWidget):
             x1, y1 = self.inflection_points[i]
             x2, y2 = self.inflection_points[i + 1]
             self.canvas.axes.plot([x1, x2], [y1, y2], color='g')  # Draw the actual threshold in green
-            self.canvas.axes.plot(x1, y1, 'go', markersize=5)
-            self.canvas.axes.plot(x2, y2, 'go', markersize=5)
+            if (x1, y1) == self.selected_inflection_index:
+                self.canvas.axes.plot(x1, y1, 'ro', markersize=10)  # Change color and size for selected inflection point
+            else:
+                self.canvas.axes.plot(x1, y1, 'go', markersize=5)
+            if (x2, y2) == self.selected_inflection_index:
+                self.canvas.axes.plot(x2, y2, 'ro', markersize=10)  # Change color and size for selected inflection point
+            else:
+                self.canvas.axes.plot(x2, y2, 'go', markersize=5)
         # Restore the x-axis limits
         self.canvas.axes.set_xlim(xlim)
-
         # Redraw the canvas
         self.canvas.draw()
 
     def onclick(self, event):
-        # Update the threshold with the y-coordinate of the click
-        self.threshold = event.ydata
+        # Check if the click is inside the axes
+        if event.xdata is None or event.ydata is None:
+            self.selected_inflection_point = None
+            return
+    
+        # Check if the click is near an existing inflection point
+        nearest_inflection_point = None
+        nearest_distance = float('inf')
+        p=0
+        for x, y in self.inflection_points:
+            distance = ((event.xdata - x) ** 2 + (event.ydata - y) ** 2) ** 0.5
+            if distance < nearest_distance:
+                nearest_distance = distance
+                nearest_inflection_point = (x, y)
+                self.point_index = p  
+            p+=1
+    
+        if nearest_distance < 100:          
+            self.selected_inflection_index = nearest_inflection_point
+        else:
+            self.selected_inflection_index = None
+    
+        # If no inflection point is selected, add a new one
+        if self.selected_inflection_index is None:
+            self.threshold = event.ydata
+            self.inflection_points.append((event.xdata, self.threshold))
+            self.inflection_points.sort()  # Ensure the inflection points are in order
+        
+        # If this is the first point we are adding set the entry point too
+        if len(self.inflection_points) > 1:
+            zero =  (0,self.inflection_points[1][1])
+            self.inflection_points[0] = zero 
+        
+        # Update the thresholded signal based on the inflection points
+        self.update_thresholded_signal()
 
-        # Add an inflection point at the x-coordinate of the click
-        self.inflection_points.append((event.xdata, self.threshold))
-        self.inflection_points.sort()  # Ensure the inflection points are in order
+        # Redraw the plot
+        self.draw_plot()
+        
+    def on_key_press(self, event):
+        if event.key == ' ':
+            self.remove_inflection_point()
 
-        # Update the thresholded signal based on the new inflection points
+    def update_thresholded_signal(self):
         for i in range(len(self.inflection_points) - 1):
             x1, y1 = self.inflection_points[i]
             x2, y2 = self.inflection_points[i + 1]
-            self.df.loc[(self.df.index >= x1) & (self.df.index < x2), 'Thresholded Signal'] = np.where(self.df.loc[(self.df.index >= x1) & (self.df.index < x2), self.signal_column] >= y1, 1, 0)
-
-        # Redraw the plot with the new threshold
-        self.draw_plot()
+            self.df.loc[(self.df.index >= x1) & (self.df.index < x2), 'Thresholded Signal'] = np.where(
+                self.df.loc[(self.df.index >= x1) & (self.df.index < x2), self.signal_column] >= y1, 1, 0)
+    
+    def remove_inflection_point(self):
+        if self.selected_inflection_index is not None:
+            del self.inflection_points[self.point_index]
+            self.point_index = None
+            self.selected_inflection_index = None
+            self.update_thresholded_signal()
+            self.draw_plot()
 
     def update_plot(self, value):
         # Update the plot based on the scrollbar position and window width
