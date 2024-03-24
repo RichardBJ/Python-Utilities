@@ -75,13 +75,17 @@ class ApplicationWindow(QWidget):
         xlim = self.canvas.axes.get_xlim() if self.canvas.axes.get_xlim() != (0, 1) else (0, 1000)
         # Clear the canvas
         self.canvas.axes.clear()
-        # Plot the signal and the threshold
+        # Plot the signal and the thresholded signal
         self.canvas.axes.plot(self.df[self.signal_column], 'b')
         self.canvas.axes.plot(self.df[self.threshed_col], 'r')
+
+        # Plot the regression line segments
         for i in range(len(self.inflection_points) - 1):
             x1, y1 = self.inflection_points[i]
             x2, y2 = self.inflection_points[i + 1]
+            
             self.canvas.axes.plot([x1, x2], [y1, y2], color='g')  # Draw the actual threshold in green
+            
             if (x1, y1) == self.selected_inflection_index:
                 self.canvas.axes.plot(x1, y1, 'ro', markersize=10)  # Change color and size for selected inflection point
             else:
@@ -90,6 +94,21 @@ class ApplicationWindow(QWidget):
                 self.canvas.axes.plot(x2, y2, 'ro', markersize=10)  # Change color and size for selected inflection point
             else:
                 self.canvas.axes.plot(x2, y2, 'go', markersize=5)
+    
+            # Calculate the regression line equation for the segment
+            slope = (y2 - y1) / (x2 - x1) if x2 != x1 else 0
+            intercept = y1 - slope * x1
+    
+            # Plot the regression line segment
+            segment_indices = (self.df.index >= x1) & (self.df.index < x2)
+            x_values = self.df.loc[segment_indices, :].index.values
+            y_values = slope * x_values + intercept
+            self.canvas.axes.plot(x_values, y_values, 'g', label='Regression Line Segment')
+
+            
+
+
+
         # Restore the x-axis limits
         self.canvas.axes.set_xlim(xlim)
         # Redraw the canvas
@@ -102,12 +121,20 @@ class ApplicationWindow(QWidget):
         return slope, intercept
 
     def update_thresholded_signal(self):
-        slope, intercept = self.calculate_regression_line()
-        for i in range(len(self.df)):
-            x = self.df.index[i]
-            threshold = slope * x + intercept
-            self.df.loc[x, self.threshed_col] = int(self.df.loc[x, self.signal_column] >= threshold)
-
+        for i in range(len(self.inflection_points) - 1):
+            x1, y1 = self.inflection_points[i]
+            x2, y2 = self.inflection_points[i + 1]
+    
+            # Calculate the regression line equation for the segment
+            slope = (y2 - y1) / (x2 - x1) if x2 != x1 else 0
+            intercept = y1 - slope * x1
+    
+            # Update the thresholded signal for the segment
+            segment_indices = (self.df.index >= x1) & (self.df.index < x2)
+            x_values = self.df.loc[segment_indices, :].index.values
+            threshold_values = slope * x_values + intercept
+            self.df.loc[segment_indices, self.threshed_col] = (self.df.loc[segment_indices, self.signal_column].values >= threshold_values).astype(int)
+        
     def onclick(self, event):
         # Check if the click is inside the axes
         if event.xdata is None or event.ydata is None:
