@@ -21,12 +21,13 @@ class MplCanvas(FigureCanvas):
         super(MplCanvas, self).__init__(fig)
 
 class ApplicationWindow(QWidget):
-    def __init__(self, df, signal_column):
+    def __init__(self, df, signal_column, threshed_col):
         super().__init__()
         self.df = df
         self.signal_column = signal_column
+        self.threshed_col = threshed_col
         self.threshold = df[signal_column].median()  # Initial threshold
-        self.df['Thresholded Signal'] = np.where(self.df[self.signal_column] > self.threshold, 1, 0)
+        self.df[self.threshed_col] = np.where(self.df[self.signal_column] > self.threshold, 1, 0)
         self.inflection_points = [(0, self.threshold)]
         self.selected_inflection_index = None
         self.point_index = None
@@ -75,7 +76,7 @@ class ApplicationWindow(QWidget):
         self.canvas.axes.clear()
         # Plot the signal and the threshold
         self.canvas.axes.plot(self.df[self.signal_column], 'b')
-        self.canvas.axes.plot(self.df['Thresholded Signal'], 'r')
+        self.canvas.axes.plot(self.df[self.threshed_col], 'r')
         for i in range(len(self.inflection_points) - 1):
             x1, y1 = self.inflection_points[i]
             x2, y2 = self.inflection_points[i + 1]
@@ -141,7 +142,7 @@ class ApplicationWindow(QWidget):
         for i in range(len(self.inflection_points) - 1):
             x1, y1 = self.inflection_points[i]
             x2, y2 = self.inflection_points[i + 1]
-            self.df.loc[(self.df.index >= x1) & (self.df.index < x2), 'Thresholded Signal'] = np.where(
+            self.df.loc[(self.df.index >= x1) & (self.df.index < x2), self.threshed_col] = np.where(
                 self.df.loc[(self.df.index >= x1) & (self.df.index < x2), self.signal_column] >= y1, 1, 0)
     
     def remove_inflection_point(self):
@@ -176,17 +177,21 @@ def main():
     else:
         df = pd.read_feather(filename)
     signal_column = 'Noisy Current'  # Replace with your column name
+    if "Channels" in df.columns:
+        threshed_col = "Thresholded"
+    else:
+        threshed_col = "Channels"
 
     # Create the application
     app = QApplication(sys.argv)
-    window = ApplicationWindow(df, signal_column)
+    window = ApplicationWindow(df, signal_column, threshed_col)
     window.show()
 
     # Start the application
     app.exec_()
 
     # Save the DataFrame with the new thresholded column to a new file
-    new_filename = filename.rsplit('.', 1)[0] + '_NEW.parquet'
+    new_filename = filename.rsplit('.', 1)[0] + '_IDL.parquet'
     df.to_parquet(new_filename)
 
 if __name__ == '__main__':
