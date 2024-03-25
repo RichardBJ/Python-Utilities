@@ -6,14 +6,17 @@ Created on Sat Mar 23 16:19:49 2024
 
 import sys
 from PyQt5.QtWidgets import QApplication, QVBoxLayout, QWidget, QSlider, QLabel, QMessageBox
+from PyQt5.QtWidgets import QFileDialog
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas, NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 import numpy as np
 import pandas as pd
 from scipy.stats import linregress
-import tkinter as tk
-from tkinter.filedialog import askopenfilename
+#import tkinter as tk
+#from tkinter.filedialog import askopenfilename
+
 from PyQt5.QtCore import Qt
+
 
 # Create the QApplication instance before any QWidget instances
 app = QApplication(sys.argv)
@@ -25,11 +28,12 @@ class MplCanvas(FigureCanvas):
         super(MplCanvas, self).__init__(fig)
 
 class ApplicationWindow(QWidget):
-    def __init__(self, df, signal_column, threshed_col):
+    def __init__(self, df, signal_column, threshed_col, filename):
         super().__init__()
         self.df = df
         self.signal_column = signal_column
         self.threshed_col = threshed_col
+        self.filename = filename
         self.numeric_key_pressed = False
         self.threshold = df[signal_column].median()  # Initial threshold
         # Initial threshold set
@@ -159,11 +163,16 @@ class ApplicationWindow(QWidget):
             self.inflection_points[self.selected_threshold_index]=\
                 sorted(self.inflection_points[self.selected_threshold_index],\
                        key = lambda point: point[0])
+            #Set the first inflection point to be the origin for  x=0
+            if len(self.inflection_points[self.selected_threshold_index])>1:
+                self.inflection_points[self.selected_threshold_index][0]=\
+                    (0,self.inflection_points[self.selected_threshold_index][1][1])
+                    
             self.selected_inflection_index = None
             self.create_threshold()
             self.update_thresholded_signal()
             self.draw_plot()
-            self.numeric_key_pressed = False
+            #self.numeric_key_pressed = False
 
     def on_key_press(self, event):
         if event.key.isdigit():
@@ -177,6 +186,7 @@ class ApplicationWindow(QWidget):
             self.selected_threshold_index = threshold_index
             self.numeric_key_pressed = True
         elif event.key.isalpha():
+            #I think I'm doing this anyway so can clear this?
             self.update_thresholded_signal()
             self.numeric_key_pressed = False
         elif event.key == ' ':
@@ -184,6 +194,7 @@ class ApplicationWindow(QWidget):
             self.numeric_key_pressed = False
 
     def remove_inflection_point(self):
+        #Currently non-funcrtional in this version of the application
         if self.selected_inflection_index is not None:
             del self.inflection_points[self.selected_threshold_index][self.point_index]
             self.point_index = None
@@ -197,24 +208,47 @@ class ApplicationWindow(QWidget):
         window_width = self.window_slider.value()
         self.canvas.axes.set_xlim(start, start + window_width)
         self.canvas.draw()
+        
+    #Save dataframe at the end
+    def save_dataframe(self):
+        new_filename = self.filename.rsplit('.', 1)[0] + '_IDL.parquet'
+        self.df.to_parquet(new_filename)
+    
+    #Catch the end of the window!!
+    def closeEvent(self, event):
+        self.save_dataframe()
+        event.accept()
 
 def main():
     # Use tkinter to get the filename
-    root = tk.Tk()
-    root.withdraw()  # Hide the root window
+    # Switched to using pyqt for file open dialogs
+    #root = tk.Tk()
+    #root.withdraw()  # Hide the root window
     # Open a file dialog to select the CSV file
-    filename = askopenfilename(filetypes=[("CSV files", "*.csv"),
-                                          ("Parquet files", "*.parquet"),
-                                          ("Feather files", "*.feather")])
-    root.destroy()
+    #filename = askopenfilename(filetypes=[("CSV files", "*.csv"),
+    #                                      ("Parquet files", "*.parquet"),
+    #                                      ("Feather files", "*.feather")])
+    
+    #root.destroy()
+    
+    
+    dialog = QFileDialog()
+    dialog.setFileMode(QFileDialog.AnyFile)
 
-    """No work: Nothing shows!!!"""
+    if dialog.exec_():
+        filename = dialog.selectedFiles()[0]
+        print(f"You selected: {filename}")
+    else:
+        print("No file selected.")
+
+    
     msgBox = QMessageBox()
     msgBox.setText("Hit a numeric key to choose the threshold you are working\nand then left click to set the actual threshold level")
     msgBox.setWindowTitle("Instructions")
     msgBox.setStandardButtons(QMessageBox.Ok)
     msgBox.exec()
-
+    
+    
     # Load the data
     if "csv" in filename.lower():
         df = pd.read_csv(filename)
@@ -230,15 +264,13 @@ def main():
         threshed_col = "Channels"
 
     # Create the application window
-    window = ApplicationWindow(df, signal_column, threshed_col)
+    window = ApplicationWindow(df, signal_column, threshed_col, filename)
     window.show()
-
+    print("start app")
     # Start the application
-    sys.exit(app.exec_())
+    sys.exit( app.exec_() )
 
-    # Save the DataFrame with the new thresholded column to a new file
-    new_filename = filename.rsplit('.', 1)[0] + '_IDL.parquet'
-    df.to_parquet(new_filename)
+    
 
 if __name__ == '__main__':
     main()
