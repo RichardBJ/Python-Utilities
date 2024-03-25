@@ -139,7 +139,8 @@ class ApplicationWindow(QWidget):
         for i, threshold in enumerate(sorted_thresholds):
             self.df[self.threshed_col] = \
                 np.where(self.df[self.signal_column].values > threshold,\
-                                                  i + 1, 0)
+                                                  i + 1, 0) #Not zero just unchanged!
+            #so need to add these columns more inelligently!
 
     def onclick(self, event):
         # Check if the click is inside the axes
