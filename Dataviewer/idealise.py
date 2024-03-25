@@ -105,10 +105,6 @@ class ApplicationWindow(QWidget):
             y_values = slope * x_values + intercept
             self.canvas.axes.plot(x_values, y_values, 'g', label='Regression Line Segment')
 
-            
-
-
-
         # Restore the x-axis limits
         self.canvas.axes.set_xlim(xlim)
         # Redraw the canvas
