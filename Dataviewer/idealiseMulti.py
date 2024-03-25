@@ -138,7 +138,7 @@ class ApplicationWindow(QWidget):
     
         for i, threshold in enumerate(sorted_thresholds):
             self.df[self.threshed_col] = \
-                np.where(self.df[self.signal_column].values[:, None] >= threshold,\
+                np.where(self.df[self.signal_column].values > threshold,\
                                                   i + 1, 0)
 
     def onclick(self, event):
@@ -167,16 +167,15 @@ class ApplicationWindow(QWidget):
                 for index in range(len(self.thresholds), threshold_index + 1):
                     self.thresholds.append(self.df[self.signal_column].median())
                     self.inflection_points[index] = [(0, self.thresholds[index])]
-                self.thresholds.sort()
-
+                
             self.selected_threshold_index = threshold_index
             self.numeric_key_pressed = True
-
+        elif event.key.isalpha():
+            self.update_thresholded_signal()
+            self.numeric_key_pressed = False
         elif event.key == ' ':
             self.remove_inflection_point()
             self.numeric_key_pressed = False
-        else:
-            self.numeric_key_pressed = True
 
     def remove_inflection_point(self):
         if self.selected_inflection_index is not None:
