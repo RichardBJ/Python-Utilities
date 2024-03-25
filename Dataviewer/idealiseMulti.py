@@ -6,6 +6,7 @@ Created on Sat Mar 23 16:19:49 2024
 """
 import sys
 from PyQt5.QtWidgets import QApplication, QVBoxLayout, QWidget, QSlider, QLabel
+from PyQt5.QtWidgets import QMessageBox
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas, NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 import numpy as np
@@ -27,7 +28,11 @@ class ApplicationWindow(QWidget):
         self.df = df
         self.signal_column = signal_column
         self.threshed_col = threshed_col
+        self.numeric_key_pressed = False
         self.threshold = df[signal_column].median()  # Initial threshold
+        self.thresholds = [df[signal_column].median()]  # Initial threshold
+        self.selected_threshold_index = 0
+        self.threshold_indexes = [0]
         self.df[self.threshed_col] = np.where(self.df[self.signal_column] > self.threshold, 1, 0)
         self.inflection_points = [(0, self.threshold)]
         self.selected_inflection_index = None
@@ -78,37 +83,13 @@ class ApplicationWindow(QWidget):
         # Plot the signal and the thresholded signal
         self.canvas.axes.plot(self.df[self.signal_column], 'b')
         self.canvas.axes.plot(self.df[self.threshed_col], 'r')
-
-        # Plot the regression line segments
-        for i in range(len(self.inflection_points) - 1):
-            x1, y1 = self.inflection_points[i]
-            x2, y2 = self.inflection_points[i + 1]
-            
-            self.canvas.axes.plot([x1, x2], [y1, y2], color='g')  # Draw the actual threshold in green
-            
-            if (x1, y1) == self.selected_inflection_index:
-                self.canvas.axes.plot(x1, y1, 'ro', markersize=10)  # Change color and size for selected inflection point
-            else:
-                self.canvas.axes.plot(x1, y1, 'go', markersize=5)
-            if (x2, y2) == self.selected_inflection_index:
-                self.canvas.axes.plot(x2, y2, 'ro', markersize=10)  # Change color and size for selected inflection point
-            else:
-                self.canvas.axes.plot(x2, y2, 'go', markersize=5)
+        # Plot the signal and the thresholded signal
+        self.canvas.axes.plot(self.df[self.signal_column], 'b')
+        self.canvas.axes.plot(self.df[self.threshed_col], 'r')
     
-            # Calculate the regression line equation for the segment
-            slope = (y2 - y1) / (x2 - x1) if x2 != x1 else 0
-            intercept = y1 - slope * x1
-    
-            # Plot the regression line segment
-            segment_indices = (self.df.index >= x1) & (self.df.index < x2)
-            x_values = self.df.loc[segment_indices, :].index.values
-            y_values = slope * x_values + intercept
-            self.canvas.axes.plot(x_values, y_values, 'g', label='Regression Line Segment')
-
-            
-
-
-
+        # Plot the thresholds as horizontal lines
+        for threshold in self.thresholds:
+            self.canvas.axes.axhline(y=threshold, color='g', linestyle='--', label='Threshold')
         # Restore the x-axis limits
         self.canvas.axes.set_xlim(xlim)
         # Redraw the canvas
@@ -121,20 +102,10 @@ class ApplicationWindow(QWidget):
         return slope, intercept
 
     def update_thresholded_signal(self):
-        for i in range(len(self.inflection_points) - 1):
-            x1, y1 = self.inflection_points[i]
-            x2, y2 = self.inflection_points[i + 1]
-    
-            # Calculate the regression line equation for the segment
-            slope = (y2 - y1) / (x2 - x1) if x2 != x1 else 0
-            intercept = y1 - slope * x1
-    
-            # Update the thresholded signal for the segment
-            segment_indices = (self.df.index >= x1) & (self.df.index < x2)
-            x_values = self.df.loc[segment_indices, :].index.values
-            threshold_values = slope * x_values + intercept
-            self.df.loc[segment_indices, self.threshed_col] = (self.df.loc[segment_indices, self.signal_column].values >= threshold_values).astype(int)
-        
+        self.df[self.threshed_col] = 0  # Reset the thresholded column
+        for i, threshold in enumerate(self.thresholds):
+            self.df.loc[self.df[self.signal_column] >= threshold, self.threshed_col] = i + 1       
+     
     def onclick(self, event):
         # Check if the click is inside the axes
         if event.xdata is None or event.ydata is None:
@@ -144,49 +115,60 @@ class ApplicationWindow(QWidget):
         # Check if the click is near an existing inflection point
         nearest_inflection_point = None
         nearest_distance = float('inf')
-        p=0
+        p = 0
         for x, y in self.inflection_points:
             distance = ((event.xdata - x) ** 2 + (event.ydata - y) ** 2) ** 0.5
             if distance < nearest_distance:
                 nearest_distance = distance
                 nearest_inflection_point = (x, y)
-                self.point_index = p  
-            p+=1
+                self.point_index = p
+            p += 1
     
-        if nearest_distance < 100:          
+        if nearest_distance < 100:
             self.selected_inflection_index = nearest_inflection_point
         else:
             self.selected_inflection_index = None
     
-        # If no inflection point is selected, add a new one
-        if self.selected_inflection_index is None:
-            self.threshold = event.ydata
-            self.inflection_points.append((event.xdata, self.threshold))
-            self.inflection_points.sort()  # Ensure the inflection points are in order
+        # Update the selected threshold if a numeric key was pressed
+        if self.numeric_key_pressed:
+            new_threshold = event.ydata
+            self.thresholds[self.selected_threshold_index] = new_threshold
+            self.thresholds.sort()  # Ensure the thresholds are in ascending order
+            self.inflection_points = [(0, self.thresholds[0])]  # Reset inflection points
+            for threshold in self.thresholds[1:]:
+                self.inflection_points.append((len(self.df), threshold))
         
-        # If this is the first point we are adding set the entry point too
-        if len(self.inflection_points) > 1:
-            zero =  (0,self.inflection_points[1][1])
-            self.inflection_points[0] = zero 
+            # Update the thresholded signal based on the new thresholds
+            self.update_thresholded_signal()
         
-        # Update the thresholded signal based on the inflection points
-        self.update_thresholded_signal()
-
-        # Redraw the plot
-        self.draw_plot()
+            # Redraw the plot
+            self.draw_plot()
         
+        self.numeric_key_pressed = False
+    
     def on_key_press(self, event):
-        if event.key == ' ':
+        if event.key.isdigit():
+            threshold_index = int(event.key) - 1
+            """Do we already have this many thresholds if not add"""
+            if threshold_index > max(self.threshold_indexes):
+                for index in range(max(self.threshold_indexes),threshold_index):
+                    self.threshold_indexes.append(index+1)
+                    self.thresholds.append(self.df[self.signal_column].median())
+                self.thresholds.sort() 
+                self.threshold_indexes.sort()
+            
+            self.selected_threshold_index = threshold_index
+            self.numeric_key_pressed = True
+            
+        elif event.key == ' ':
             self.remove_inflection_point()
+            self.numeric_key_pressed = False
+        else:
+            self.numeric_key_pressed = True
 
-    """ ORIGINAL VERSION
-    def update_thresholded_signal(self):
-        for i in range(len(self.inflection_points) - 1):
-            x1, y1 = self.inflection_points[i]
-            x2, y2 = self.inflection_points[i + 1]
-            self.df.loc[(self.df.index >= x1) & (self.df.index < x2), self.threshed_col] = np.where(
-                self.df.loc[(self.df.index >= x1) & (self.df.index < x2), self.signal_column] >= y1, 1, 0)
-    """
+            
+            
+    
     def remove_inflection_point(self):
         if self.selected_inflection_index is not None:
             del self.inflection_points[self.point_index]
@@ -211,6 +193,13 @@ def main():
                                       ("Parquet files", "*.parquet"),
                                       ("Feather files", "*.feather")])
     root.destroy()
+    """No work: Nothing shows!!!"""
+    msgBox = QMessageBox()
+    msgBox.setText("Hit a numeric key to choose the threshold you are working\nand then left click to set the actual threshold level")
+    msgBox.setWindowTitle("Instructions")
+    msgBox.setStandardButtons(QMessageBox.Ok)
+    msgBox.exec()
+    
     # Load the data
     if "csv" in filename.lower():
         df = pd.read_csv(filename)
@@ -238,3 +227,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
