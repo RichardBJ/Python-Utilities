@@ -132,16 +132,21 @@ class ApplicationWindow(QWidget):
             y.extend([start_point[1]] * len(x_range))
         self.thresholds[self.selected_threshold_index] = y
 
-    def update_thresholded_signal(self):
-        self.df[self.threshed_col] = 0  # Reset the thresholded column
-        sorted_thresholds = [sorted(threshold) for threshold in self.thresholds]
-    
-        for i, threshold in enumerate(sorted_thresholds):
-            self.df[self.threshed_col] = \
-                np.where(self.df[self.signal_column].values > threshold,\
-                                                  i + 1, 0) #Not zero just unchanged!
-            #so need to add these columns more inelligently!
+    def add_threshs(self, arrays: list) -> np.array:
+        results = np.zeros_like(arrays[0])
+        for arr in arrays:
+            results[arr != 0] = arr[arr != 0]
+        return results
 
+    def update_thresholded_signal(self):
+        sorted_thresholds = [sorted(threshold) for threshold in self.thresholds]
+        arrays=[]
+        for i, threshold in enumerate(sorted_thresholds):
+            arrays.append(np.where(self.df[self.signal_column].values > threshold,\
+                          i + 1, 0) ) #Not zero just unchanged!
+            #so need to add these columns more inelligently!
+        self.df[self.threshed_col] = self.add_threshs(arrays)
+        
     def onclick(self, event):
         # Check if the click is inside the axes
         if event.xdata is None or event.ydata is None:
