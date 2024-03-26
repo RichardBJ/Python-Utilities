@@ -79,7 +79,6 @@ class ApplicationWindow(QWidget):
         self.axes.plot(self.df["Noisy Current"], 'b', label="Noisy Current")
         self.axes.plot(self.df["Channels"], 'r', label="Channels")
 
-
         # Draw the selection rectangle
         if self.start_x is not None and self.end_x is not None:
             x1, x2 = sorted([self.start_x, self.end_x])

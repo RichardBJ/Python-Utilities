@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """
 Created on Wed Feb 28 17:56:28 2024
-SIMPLE CONVERSION between parquet and csv
+SIMPLE CONVERSION BOTHWAYS between parquet and csv
 @author: rbj
 straight forward conversion to and from parquet and csv
+Formatting all retained.
 """
 
 import pandas as pd
@@ -32,7 +33,7 @@ if file_path:
     elif file_path.endswith('.parquet'):
         # Read the Parquet file with pandas
         df = pd.read_parquet(file_path)
-        df.to_parquet(file_path.replace(".parquet", ".csv"))
+        df.to_csv(file_path.replace(".parquet", ".csv"))
     print(df.info())
     print(df.head())
 
