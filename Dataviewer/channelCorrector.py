@@ -171,9 +171,12 @@ def main():
     else:
         print("No file selected.")
         return
-
+    msg = "Hit a numeric key to choose the column you want to adjust:" \
+    +"\n1 - Noisy Current"\
+    +"n2 - Channels\nThen click and drag to select a region."
+    
     msgBox = QMessageBox()
-    msgBox.setText("Hit a numeric key to choose the column you want to adjust:\n1 - Noisy Current\n2 - Channels\nThen click and drag to select a region.")
+    msgBox.setText(msg)
     msgBox.setWindowTitle("Instructions")
     msgBox.setStandardButtons(QMessageBox.Ok)
     msgBox.exec()
