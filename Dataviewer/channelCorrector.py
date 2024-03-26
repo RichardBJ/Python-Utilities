@@ -8,7 +8,6 @@ import sys
 from PyQt5.QtWidgets import QApplication, QVBoxLayout, QWidget, QSlider, QLabel, QMessageBox, QFileDialog
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas, NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
-import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -95,9 +94,9 @@ class ApplicationWindow(QWidget):
 
     def draw_selection(self, start_x, end_x):
         # Clear any existing selection rectangle
-        for artist in self.axes.get_children():
-            if isinstance(artist, plt.Rectangle):
-                artist.remove()
+        for patch in self.axes.patches:
+            if isinstance(patch, plt.Rectangle):
+                patch.remove()
     
         # Draw the new selection rectangle
         x1, x2 = sorted([start_x, end_x])
@@ -128,9 +127,9 @@ class ApplicationWindow(QWidget):
         if self.pressed:
             self.end_x = event.xdata
             # Clear any existing selection rectangle
-            for artist in self.axes.get_children():
-                if isinstance(artist, plt.Rectangle):
-                    artist.remove()
+            for patch in self.axes.patches:
+                if isinstance(patch, plt.Rectangle):
+                    patch.remove()
             # Draw the new selection rectangle
             x1, x2 = sorted([self.start_x, self.end_x])
             y1, y2 = self.axes.get_ylim()
@@ -141,21 +140,19 @@ class ApplicationWindow(QWidget):
 
     def on_key_press(self, event):
         if event.key.isdigit():       
-            self.selected_channels = \
-                int(event.key) if int(event.key) >=0 else int(event.key)          
+            self.selected_channels = int(event.key) if int(event.key) >= 0 else int(event.key)          
             self.numeric_key_pressed = True
 
-    def update_plot(self, value):
-        # Check if the scrollbar triggered the update
-        if self.sender() == self.scrollbar:
-            # Update the plot based on the scrollbar position and window width
-            start = self.scrollbar.value()
-            window_width = self.window_slider.value()
-            self.axes.set_xlim(start, start + window_width)
-            self.canvas.draw()
-        else:
-            # If the window width slider triggered the update, just redraw the canvas
-            self.canvas.draw()
+    def update_plot(self):
+        # Get the current scrollbar position and window width
+        start = self.scrollbar.value()
+        window_width = self.window_slider.value()
+
+        # Update the x-axis limits based on the scrollbar position and window width
+        self.axes.set_xlim(start, start + window_width)
+
+        # Redraw the canvas
+        self.canvas.draw()
     
     #Save dataframe at the end
     def save_dataframe(self):
