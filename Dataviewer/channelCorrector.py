@@ -15,11 +15,13 @@ import matplotlib.pyplot as plt
 from PyQt5.QtCore import Qt
 
 class ApplicationWindow(QWidget):
-    def __init__(self, df):
+    def __init__(self, df, filename):
         super().__init__()
         self.df = df
+        self.filename = filename
         self.numeric_key_pressed = False
         self.threshold_levels = {}
+        self.selected_channels = 1
         self.selected_column = None
         self.inflection_points = {}
         self.pressed = False
@@ -78,19 +80,12 @@ class ApplicationWindow(QWidget):
         self.axes.plot(self.df["Noisy Current"], 'b', label="Noisy Current")
         self.axes.plot(self.df["Channels"], 'r', label="Channels")
 
-        # Plot the inflection points and threshold levels
-        for column, inflection_points in self.inflection_points.items():
-            threshold_level = self.threshold_levels.get(column, self.df[column].median())
-            self.axes.axhline(y=threshold_level, color='k', linestyle='--', label=f"{column} Threshold")
-            x_values, _ = zip(*inflection_points)
-            y_values = [threshold_level] * len(inflection_points)
-            self.axes.plot(x_values, y_values, 'ko', markersize=5)  # Plot inflection points as black dots
 
         # Draw the selection rectangle
         if self.start_x is not None and self.end_x is not None:
             x1, x2 = sorted([self.start_x, self.end_x])
             y1, y2 = self.axes.get_ylim()
-            self.axes.add_patch(plt.Rectangle((x1, y1), x2 - x1, y2 - y1, fill=False, edgecolor='r', linewidth=2))
+            self.axes.add_patch(plt.Rectangle((x1, y1), x2 - x1, y2 - y1, fill=False, edgecolor='k', linewidth=2))
 
         # Restore the x-axis limits
         self.axes.set_xlim(xlim)
@@ -99,23 +94,24 @@ class ApplicationWindow(QWidget):
         self.canvas.draw()
 
     def draw_selection(self, start_x, end_x):
-        self.axes.clear()
-        self.draw_plot()
-
+        # Clear any existing selection rectangle
+        for artist in self.axes.get_children():
+            if isinstance(artist, plt.Rectangle):
+                artist.remove()
+    
+        # Draw the new selection rectangle
         x1, x2 = sorted([start_x, end_x])
         y1, y2 = self.axes.get_ylim()
-        self.axes.add_patch(plt.Rectangle((x1, y1), x2 - x1, y2 - y1, fill=False, edgecolor='r', linewidth=2))
-
+        self.axes.add_patch(plt.Rectangle((x1, y1), x2 - x1, y2 - y1, fill=False, edgecolor='k', linewidth=2))
+    
+        # Redraw the canvas
         self.canvas.draw()
-
+        
     def select_region(self, start_x, end_x):
-        if self.selected_column is not None:
-            x1, x2 = sorted([start_x, end_x])
-            mask = (self.df["Time"] >= x1) & (self.df["Time"] <= x2)
-            threshold_level = self.df[self.selected_column][mask].median()
-            self.threshold_levels[self.selected_column] = threshold_level
-            self.inflection_points[self.selected_column] = [(x1, threshold_level), (x2, threshold_level)]
-            self.draw_plot()
+        x1, x2 = sorted([start_x, end_x])
+        mask = (self.df.index >= x1) & (self.df.index <= x2)
+        self.df["Channels"][mask] = self.selected_channels
+        self.draw_plot()
 
     def on_button_press(self, event):
         if event.button == 1:  # Left mouse button
@@ -131,35 +127,46 @@ class ApplicationWindow(QWidget):
     def on_motion_notify(self, event):
         if self.pressed:
             self.end_x = event.xdata
-            self.draw_selection(self.start_x, self.end_x)
+            # Clear any existing selection rectangle
+            for artist in self.axes.get_children():
+                if isinstance(artist, plt.Rectangle):
+                    artist.remove()
+            # Draw the new selection rectangle
+            x1, x2 = sorted([self.start_x, self.end_x])
+            y1, y2 = self.axes.get_ylim()
+            self.axes.add_patch(plt.Rectangle((x1, y1), x2 - x1, y2 - y1, fill=False, edgecolor='k', linewidth=2))
+            # Redraw the canvas
+            self.canvas.draw()
+      
 
     def on_key_press(self, event):
-        if event.key.isdigit():
-            column_index = int(event.key) - 1
-            if column_index == 0:
-                self.selected_column = "Noisy Current"
-            elif column_index == 1:
-                self.selected_column = "Channels"
-            else:
-                return
-
-            if self.selected_column not in self.inflection_points:
-                self.inflection_points[self.selected_column] = []
-
+        if event.key.isdigit():       
+            self.selected_channels = \
+                int(event.key) if int(event.key) >=0 else int(event.key)          
             self.numeric_key_pressed = True
-        elif event.key == ' ':
-            if self.selected_column in self.inflection_points:
-                del self.inflection_points[self.selected_column]
-            self.selected_column = None
-            self.numeric_key_pressed = False
-            self.draw_plot()
 
     def update_plot(self, value):
-        # Update the plot based on the scrollbar position and window width
-        start = self.scrollbar.value()
-        window_width = self.window_slider.value()
-        self.axes.set_xlim(start, start + window_width)
-        self.canvas.draw()
+        # Check if the scrollbar triggered the update
+        if self.sender() == self.scrollbar:
+            # Update the plot based on the scrollbar position and window width
+            start = self.scrollbar.value()
+            window_width = self.window_slider.value()
+            self.axes.set_xlim(start, start + window_width)
+            self.canvas.draw()
+        else:
+            # If the window width slider triggered the update, just redraw the canvas
+            self.canvas.draw()
+    
+    #Save dataframe at the end
+    def save_dataframe(self):
+        new_filename = self.filename.rsplit('.', 1)[0] + '_COR.parquet'
+        self.df.to_parquet(new_filename)
+    
+    #Catch the end of the window!!
+    def closeEvent(self, event):
+        self.save_dataframe()
+        event.accept()
+
 
 def main():
     # Open a file dialog to select the CSV file
@@ -171,9 +178,10 @@ def main():
     else:
         print("No file selected.")
         return
-    msg = "Hit a numeric key to choose the column you want to adjust:" \
-    +"\n1 - Noisy Current"\
-    +"n2 - Channels\nThen click and drag to select a region."
+    msg = "HIT A NUMBER FIRST, then select a bit of trace:" \
+    +"\n0 - Set to 0 channels open"\
+    +"\n1 - Set to 1 channel open et seq" \
+    +"\n Sorry a bug you don't see the edit rectangle until it updates"
     
     msgBox = QMessageBox()
     msgBox.setText(msg)
@@ -190,11 +198,11 @@ def main():
         df = pd.read_feather(filename)
 
     # Create the application window
-    window = ApplicationWindow(df)
+    window = ApplicationWindow(df,filename)
     window.show()
 
     # Start the application
-    app.exec_()
+    sys.exit(app.exec_())
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
