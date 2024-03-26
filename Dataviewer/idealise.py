@@ -22,11 +22,12 @@ class MplCanvas(FigureCanvas):
         super(MplCanvas, self).__init__(fig)
 
 class ApplicationWindow(QWidget):
-    def __init__(self, df, signal_column, threshed_col):
+    def __init__(self, df, signal_column, threshed_col, filename):
         super().__init__()
         self.df = df
         self.signal_column = signal_column
         self.threshed_col = threshed_col
+        self.filename=filename
         self.threshold = df[signal_column].median()  # Initial threshold
         self.df[self.threshed_col] = np.where(self.df[self.signal_column] > self.threshold, 1, 0)
         self.inflection_points = [(0, self.threshold)]
@@ -131,7 +132,14 @@ class ApplicationWindow(QWidget):
             segment_indices = (self.df.index >= x1) & (self.df.index < x2)
             x_values = self.df.loc[segment_indices, :].index.values
             threshold_values = slope * x_values + intercept
-            self.df.loc[segment_indices, self.threshed_col] = (self.df.loc[segment_indices, self.signal_column].values >= threshold_values).astype(int)*self.max
+            # Convert the 'Threshed' (or 'Channels') column to a float data type
+            self.df[self.threshed_col] = self.df[self.threshed_col].astype(float)
+
+            # Then, you can assign the values as before
+            self.df.loc[segment_indices, self.threshed_col] = (
+    self.df.loc[segment_indices, self.signal_column].values >= threshold_values
+).astype(int) * self.max
+            #self.df.loc[segment_indices, self.threshed_col] = (self.df.loc[segment_indices, self.signal_column].values >= threshold_values).astype(int)*self.max
 
     def onclick(self, event):
         # Check if the click is inside the axes
@@ -199,6 +207,20 @@ class ApplicationWindow(QWidget):
         window_width = self.window_slider.value()
         self.canvas.axes.set_xlim(start, start + window_width)
         self.canvas.draw()
+        
+    #Save dataframe at the end
+    def save_dataframe(self):
+        new_filename = self.filename.rsplit('.', 1)[0] + '_IDL.parquet'
+        self.df.to_parquet(new_filename)
+
+    #Catch the end of the window!!
+    def closeEvent(self, event):
+        self.save_dataframe()
+        # Disconnect event handlers
+        for connection in self.connections:
+          if connection:
+            connection.disconnect()
+        event.accept()
 
 def main():
     # Use tkinter to get the filename
@@ -214,6 +236,8 @@ def main():
         df = pd.read_csv(filename)
     elif "parquet" in filename.lower():
         df = pd.read_parquet(filename)
+    elif "feather" in filename.lower():
+        df = pd.read_feather(filename)
     else:
         df = pd.read_feather(filename)
     signal_column = 'Noisy Current'  # Replace with your column name
@@ -224,15 +248,11 @@ def main():
 
     # Create the application
     app = QApplication(sys.argv)
-    window = ApplicationWindow(df, signal_column, threshed_col)
+    window = ApplicationWindow(df, signal_column, threshed_col, filename)
     window.show()
 
     # Start the application
-    app.exec_()
-
-    # Save the DataFrame with the new thresholded column to a new file
-    new_filename = filename.rsplit('.', 1)[0] + '_IDL.parquet'
-    df.to_parquet(new_filename)
+    sys.exit(app.exec_())
 
 if __name__ == '__main__':
     main()
