@@ -40,8 +40,14 @@ class ApplicationWindow(QWidget):
         self.canvas = MplCanvas(self)
         self.canvas.setFocusPolicy(Qt.StrongFocus)
         self.canvas.setFocus()
-        self.canvas.mpl_connect('button_press_event', self.onclick)
-        self.canvas.mpl_connect('key_press_event', self.on_key_press)
+        self.connections = []  # List to store connection objects
+        # Connect to button press event and store the connection
+        self.click_connection = self.canvas.mpl_connect('button_press_event', self.onclick)
+        self.connections.append(self.click_connection)
+        
+        # Connect to key press event and store the connection
+        self.key_connection = self.canvas.mpl_connect('key_press_event', self.on_key_press)
+        self.connections.append(self.key_connection)
 
         # Create a vertical box layout and add the canvas
         vbox = QVBoxLayout()
@@ -217,9 +223,11 @@ class ApplicationWindow(QWidget):
     def closeEvent(self, event):
         self.save_dataframe()
         # Disconnect event handlers
+        """ Didn't work throws type error.
         for connection in self.connections:
           if connection:
-            connection.disconnect()
+            connection.disconnect()"""
+
         event.accept()
 
 def main():
@@ -248,6 +256,7 @@ def main():
 
     # Create the application
     app = QApplication(sys.argv)
+    QApplication.setQuitOnLastWindowClosed(True)
     window = ApplicationWindow(df, signal_column, threshed_col, filename)
     window.show()
 
