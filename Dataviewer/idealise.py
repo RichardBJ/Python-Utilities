@@ -216,6 +216,8 @@ class ApplicationWindow(QWidget):
         
     #Save dataframe at the end
     def save_dataframe(self):
+        self.df["Channels"]= (self.df["Channels"] / self.max).astype(int)
+        self.df.reset_index(drop=True, inplace=True)
         new_filename = self.filename.rsplit('.', 1)[0] + '_IDL.parquet'
         self.df.to_parquet(new_filename)
 
