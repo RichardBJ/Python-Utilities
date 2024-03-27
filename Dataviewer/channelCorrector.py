@@ -79,7 +79,6 @@ class ApplicationWindow(QWidget):
         self.axes.plot(self.df["Noisy Current"], 'b', label="Noisy Current")
         self.axes.plot(self.df["Channels"], 'r', label="Channels")
 
-
         # Draw the selection rectangle
         if self.start_x is not None and self.end_x is not None:
             x1, x2 = sorted([self.start_x, self.end_x])
@@ -97,19 +96,19 @@ class ApplicationWindow(QWidget):
         for patch in self.axes.patches:
             if isinstance(patch, plt.Rectangle):
                 patch.remove()
-    
+
         # Draw the new selection rectangle
         x1, x2 = sorted([start_x, end_x])
         y1, y2 = self.axes.get_ylim()
         self.axes.add_patch(plt.Rectangle((x1, y1), x2 - x1, y2 - y1, fill=False, edgecolor='k', linewidth=2))
-    
+
         # Redraw the canvas
         self.canvas.draw()
-        
+
     def select_region(self, start_x, end_x):
         x1, x2 = sorted([start_x, end_x])
         mask = (self.df.index >= x1) & (self.df.index <= x2)
-        self.df["Channels"][mask] = self.selected_channels
+        self.df.loc[mask, "Channels"] = self.selected_channels
         self.draw_plot()
 
     def on_button_press(self, event):
@@ -136,11 +135,11 @@ class ApplicationWindow(QWidget):
             self.axes.add_patch(plt.Rectangle((x1, y1), x2 - x1, y2 - y1, fill=False, edgecolor='k', linewidth=2))
             # Redraw the canvas
             self.canvas.draw()
-      
+
 
     def on_key_press(self, event):
-        if event.key.isdigit():       
-            self.selected_channels = int(event.key) if int(event.key) >= 0 else int(event.key)          
+        if event.key.isdigit():
+            self.selected_channels = int(event.key) if int(event.key) >= 0 else int(event.key)
             self.numeric_key_pressed = True
 
     def update_plot(self):
@@ -153,12 +152,12 @@ class ApplicationWindow(QWidget):
 
         # Redraw the canvas
         self.canvas.draw()
-    
+
     #Save dataframe at the end
     def save_dataframe(self):
         new_filename = self.filename.rsplit('.', 1)[0] + '_COR.parquet'
         self.df.to_parquet(new_filename)
-    
+
     #Catch the end of the window!!
     def closeEvent(self, event):
         self.save_dataframe()
@@ -179,7 +178,7 @@ def main():
     +"\n0 - Set to 0 channels open"\
     +"\n1 - Set to 1 channel open et seq" \
     +"\n Sorry a bug you don't see the edit rectangle until it updates"
-    
+
     msgBox = QMessageBox()
     msgBox.setText(msg)
     msgBox.setWindowTitle("Instructions")
