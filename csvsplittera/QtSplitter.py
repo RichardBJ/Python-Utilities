@@ -31,6 +31,7 @@ if parquet_file_path:
         df_split = df.iloc[start:start + split_len]
         split_file_path = f"{os.path.splitext(parquet_file_path)[0]}_{i}.parquet"
         df_split.loc[:,"Time"] = np.arange(0, len(df_split)*si, si)
+        df_split.reset_index(drop=True, inplace=True)
         df_split.to_parquet(split_file_path)
 
     print(f"Split the file into {i} parts.")
