@@ -14,6 +14,10 @@ import tkinter as tk
 from tkinter import messagebox
 from tkinter.filedialog import askopenfilenames
 
+#Use a default sample interval of
+SI = 50e-6
+# TODO: Display that and check!!
+
 # Create the root Tk window
 root = tk.Tk()
 
@@ -57,7 +61,13 @@ if file_paths:
 
         if convert:
             nc = df.shape[1]
-            if nc == 3:
+            if nc == 1:
+                # Then must be one column of just current!?
+                df.columns = ["Noisy Current"]
+                #So add time column
+                df["Time"] = np.arange(0, len(df) * SI, SI)
+                
+            elif nc == 3:
                 # Then we have Simple time format and wish to convert to Sam format
                 df.columns = ["Time", "Noisy Current", "Channels"]
                 df['State of Channel 0'] = df.apply(
@@ -75,7 +85,7 @@ if file_paths:
                 else:
                     # If there is no time-base we must add it assuming a sample interval
                     df.columns = ["Noisy Current", "Channels"]
-                    df["Time"] = df['Time'] = np.arange(0, len(df) * 50e-6, 50e-6)
+                    df["Time"] = df['Time'] = np.arange(0, len(df) * SI, SI)
             elif nc == 4:
                 # I guess we already have Sam format
                 df.columns = df.columns
