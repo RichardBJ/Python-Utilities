@@ -22,24 +22,33 @@ class MplCanvas(FigureCanvas):
         super(MplCanvas, self).__init__(fig)
 
 class ApplicationWindow(QWidget):
-    def __init__(self, df, signal_column, threshed_col):
+    def __init__(self, df, signal_column, threshed_col, filename):
         super().__init__()
         self.df = df
         self.signal_column = signal_column
         self.threshed_col = threshed_col
+        self.filename=filename
         self.threshold = df[signal_column].median()  # Initial threshold
         self.df[self.threshed_col] = np.where(self.df[self.signal_column] > self.threshold, 1, 0)
         self.inflection_points = [(0, self.threshold)]
         self.selected_inflection_index = None
         self.point_index = None
+        self.max = self.df[signal_column].max()
+
 
         # Create the matplotlib FigureCanvas object
         self.canvas = MplCanvas(self)
         self.canvas.setFocusPolicy(Qt.StrongFocus)
-        self.canvas.setFocus()  
-        self.canvas.mpl_connect('button_press_event', self.onclick)
-        self.canvas.mpl_connect('key_press_event', self.on_key_press)
+        self.canvas.setFocus()
+        self.connections = []  # List to store connection objects
+        # Connect to button press event and store the connection
+        self.click_connection = self.canvas.mpl_connect('button_press_event', self.onclick)
+        self.connections.append(self.click_connection)
         
+        # Connect to key press event and store the connection
+        self.key_connection = self.canvas.mpl_connect('key_press_event', self.on_key_press)
+        self.connections.append(self.key_connection)
+
         # Create a vertical box layout and add the canvas
         vbox = QVBoxLayout()
         vbox.addWidget(self.canvas)
@@ -83,9 +92,9 @@ class ApplicationWindow(QWidget):
         for i in range(len(self.inflection_points) - 1):
             x1, y1 = self.inflection_points[i]
             x2, y2 = self.inflection_points[i + 1]
-            
+
             self.canvas.axes.plot([x1, x2], [y1, y2], color='g')  # Draw the actual threshold in green
-            
+
             if (x1, y1) == self.selected_inflection_index:
                 self.canvas.axes.plot(x1, y1, 'ro', markersize=10)  # Change color and size for selected inflection point
             else:
@@ -94,11 +103,11 @@ class ApplicationWindow(QWidget):
                 self.canvas.axes.plot(x2, y2, 'ro', markersize=10)  # Change color and size for selected inflection point
             else:
                 self.canvas.axes.plot(x2, y2, 'go', markersize=5)
-    
+
             # Calculate the regression line equation for the segment
             slope = (y2 - y1) / (x2 - x1) if x2 != x1 else 0
             intercept = y1 - slope * x1
-    
+
             # Plot the regression line segment
             segment_indices = (self.df.index >= x1) & (self.df.index < x2)
             x_values = self.df.loc[segment_indices, :].index.values
@@ -109,7 +118,7 @@ class ApplicationWindow(QWidget):
         self.canvas.axes.set_xlim(xlim)
         # Redraw the canvas
         self.canvas.draw()
-        
+
     def calculate_regression_line(self):
         x_values = [x for x, y in self.inflection_points]
         y_values = [y for x, y in self.inflection_points]
@@ -120,23 +129,30 @@ class ApplicationWindow(QWidget):
         for i in range(len(self.inflection_points) - 1):
             x1, y1 = self.inflection_points[i]
             x2, y2 = self.inflection_points[i + 1]
-    
+
             # Calculate the regression line equation for the segment
             slope = (y2 - y1) / (x2 - x1) if x2 != x1 else 0
             intercept = y1 - slope * x1
-    
+
             # Update the thresholded signal for the segment
             segment_indices = (self.df.index >= x1) & (self.df.index < x2)
             x_values = self.df.loc[segment_indices, :].index.values
             threshold_values = slope * x_values + intercept
-            self.df.loc[segment_indices, self.threshed_col] = (self.df.loc[segment_indices, self.signal_column].values >= threshold_values).astype(int)
-        
+            # Convert the 'Threshed' (or 'Channels') column to a float data type
+            self.df[self.threshed_col] = self.df[self.threshed_col].astype(float)
+
+            # Then, you can assign the values as before
+            self.df.loc[segment_indices, self.threshed_col] = (
+    self.df.loc[segment_indices, self.signal_column].values >= threshold_values
+).astype(int) * self.max
+            #self.df.loc[segment_indices, self.threshed_col] = (self.df.loc[segment_indices, self.signal_column].values >= threshold_values).astype(int)*self.max
+
     def onclick(self, event):
         # Check if the click is inside the axes
         if event.xdata is None or event.ydata is None:
             self.selected_inflection_point = None
             return
-    
+
         # Check if the click is near an existing inflection point
         nearest_inflection_point = None
         nearest_distance = float('inf')
@@ -146,31 +162,31 @@ class ApplicationWindow(QWidget):
             if distance < nearest_distance:
                 nearest_distance = distance
                 nearest_inflection_point = (x, y)
-                self.point_index = p  
+                self.point_index = p
             p+=1
-    
-        if nearest_distance < 100:          
+
+        if nearest_distance < 100:
             self.selected_inflection_index = nearest_inflection_point
         else:
             self.selected_inflection_index = None
-    
+
         # If no inflection point is selected, add a new one
         if self.selected_inflection_index is None:
             self.threshold = event.ydata
             self.inflection_points.append((event.xdata, self.threshold))
             self.inflection_points.sort()  # Ensure the inflection points are in order
-        
+
         # If this is the first point we are adding set the entry point too
         if len(self.inflection_points) > 1:
             zero =  (0,self.inflection_points[1][1])
-            self.inflection_points[0] = zero 
-        
+            self.inflection_points[0] = zero
+
         # Update the thresholded signal based on the inflection points
         self.update_thresholded_signal()
 
         # Redraw the plot
         self.draw_plot()
-        
+
     def on_key_press(self, event):
         if event.key == ' ':
             self.remove_inflection_point()
@@ -197,13 +213,31 @@ class ApplicationWindow(QWidget):
         window_width = self.window_slider.value()
         self.canvas.axes.set_xlim(start, start + window_width)
         self.canvas.draw()
+        
+    #Save dataframe at the end
+    def save_dataframe(self):
+        self.df["Channels"]= (self.df["Channels"] / self.max).astype(int)
+        self.df.reset_index(drop=True, inplace=True)
+        new_filename = self.filename.rsplit('.', 1)[0] + '_IDL.parquet'
+        self.df.to_parquet(new_filename)
+
+    #Catch the end of the window!!
+    def closeEvent(self, event):
+        self.save_dataframe()
+        # Disconnect event handlers
+        """ Didn't work throws type error.
+        for connection in self.connections:
+          if connection:
+            connection.disconnect()"""
+
+        event.accept()
 
 def main():
     # Use tkinter to get the filename
     root = tk.Tk()
     root.withdraw()  # Hide the root window
     # Open a file dialog to select the CSV file
-    filename = askopenfilename(filetypes=[("CSV files", "*.csv"), 
+    filename = askopenfilename(filetypes=[("CSV files", "*.csv"),
                                       ("Parquet files", "*.parquet"),
                                       ("Feather files", "*.feather")])
     root.destroy()
@@ -212,6 +246,8 @@ def main():
         df = pd.read_csv(filename)
     elif "parquet" in filename.lower():
         df = pd.read_parquet(filename)
+    elif "feather" in filename.lower():
+        df = pd.read_feather(filename)
     else:
         df = pd.read_feather(filename)
     signal_column = 'Noisy Current'  # Replace with your column name
@@ -222,15 +258,12 @@ def main():
 
     # Create the application
     app = QApplication(sys.argv)
-    window = ApplicationWindow(df, signal_column, threshed_col)
+    QApplication.setQuitOnLastWindowClosed(True)
+    window = ApplicationWindow(df, signal_column, threshed_col, filename)
     window.show()
 
     # Start the application
-    app.exec_()
-
-    # Save the DataFrame with the new thresholded column to a new file
-    new_filename = filename.rsplit('.', 1)[0] + '_IDL.parquet'
-    df.to_parquet(new_filename)
+    sys.exit(app.exec_())
 
 if __name__ == '__main__':
     main()
