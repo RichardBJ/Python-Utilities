@@ -27,7 +27,10 @@ root.withdraw()
 root.lift()
 
 # Open a file dialog for CSV or Parquet files
-file_paths = askopenfilenames(filetypes=[("CSV files", "*.csv"), ("Parquet files", "*.parquet")])
+file_paths = askopenfilenames(filetypes=[("CSV files", "*.csv"), ("Parquet files", "*.parquet"),("txt files", "*.txt")])
+
+# Convert all file paths to lower case
+file_paths = [fp.lower() for fp in file_paths]
 
 # Ask the user if they want to convert the file
 convert = messagebox.askyesno("Convert File", "Do you want to convert the file to another format?")
@@ -39,12 +42,17 @@ if file_paths:
         if file_path.endswith('.csv'):
             # Read the CSV file with pandas
             df = pd.read_csv(file_path)
+        if file_path.endswith('.txt'):
+            # Read the txt file with pandas Have to use python engine to allow
+            # Either tab or space
+            df = pd.read_csv(file_path, sep="\s", engine='python',
+                             header=None, skiprows=1)
         elif file_path.endswith('.parquet'):
             # Read the Parquet file with pandas
             df = pd.read_parquet(file_path)
-
+        df.reset_index(drop=True, inplace=True)
         print(file_path)
-        print(df.info())
+        #print(df.info())
         print(df.head())
 
         if convert:
@@ -78,6 +86,8 @@ if file_paths:
 
             if file_path.endswith('.csv'):
                 save_path = file_path.replace('.csv', '.parquet')
+            if file_path.endswith('.txt'):
+                save_path = file_path.replace('.txt', '.parquet')
             else:
                 save_path = file_path.replace('.parquet', '.csv')
 
