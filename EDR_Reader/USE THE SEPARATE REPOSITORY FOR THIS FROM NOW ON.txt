@@ -1,0 +1,2 @@
+NOTE THERE IS NOW A SEPARATE GIT FOR THE pyEDR Reader!!
+pyEDRreader
