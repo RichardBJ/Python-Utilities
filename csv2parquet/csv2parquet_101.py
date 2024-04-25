@@ -6,7 +6,6 @@ SIMPLE CONVERSION BOTHWAYS between parquet and csv
 straight forward conversion to and from parquet and csv Should include txt with either tab or spaces. multiple spaces treated as one.
 Formatting all retained.
 
-SEEMS TO CREATE AN INDEX THIS NEEDS SORTING!!!!
 """
 
 import pandas as pd
@@ -49,7 +48,7 @@ for file_path in file_paths:
         elif file_path.endswith('.parquet'):
             # Read the Parquet file with pandas
             df = pd.read_parquet(file_path)
-            df.to_csv(file_path.replace(".parquet", ".csv"))
+            df.to_csv(file_path.replace(".parquet", ".csv"), index=False)
         print(df.info())
         print(df.head())
 

@@ -3,7 +3,7 @@
 Created on Wed Feb 28 18:00:44 2024
 @author: rbj
 Will read parquet files and allow you to probe the dataset
-or even save to a CSV
+or even save to a CSV ALL IN SAM FORMAT
 
 NOTE HAVE TO RESTART KERNEL BETWEEN QT and TK runs!!!
 """
@@ -38,6 +38,7 @@ file_paths = [fp.lower() for fp in file_paths]
 
 # Ask the user if they want to convert the file
 convert = messagebox.askyesno("Convert File", "Do you want to convert the file to another format?")
+root.update()
 
 # Check if files were selected
 if file_paths:
