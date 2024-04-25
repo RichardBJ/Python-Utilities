@@ -17,7 +17,6 @@ from scipy.stats import linregress
 
 from PyQt5.QtCore import Qt
 
-
 # Create the QApplication instance before any QWidget instances
 app = QApplication(sys.argv)
 
@@ -37,7 +36,7 @@ class ApplicationWindow(QWidget):
         self.numeric_key_pressed = False
         self.threshold = df[signal_column].median()  # Initial threshold
         # Initial threshold set
-        self.thresholds = [df[signal_column].median()]  
+        self.thresholds = [df[signal_column].median()]
         self.selected_threshold_index = 0
         self.threshold_indexes = [0]
         self.df[self.threshed_col] = np.where(self.df[self.signal_column] > self.threshold, 1, 0)
@@ -92,14 +91,14 @@ class ApplicationWindow(QWidget):
         self.canvas.axes.plot(self.df[self.signal_column], 'b')
         self.canvas.axes.plot(self.df[self.threshed_col], 'r')
 
-        
+
         # Plot the inflection points and threshold lines
         for threshold_index, inflection_points in self.inflection_points.items():
             inflection_points.sort(key=lambda x: x[0])
             x_values, y_values = zip(*inflection_points)
             self.canvas.axes.plot(x_values, y_values, 'ko', markersize=5)  # Plot inflection points as black dots
             self.canvas.axes.plot(x_values, y_values, 'k-', drawstyle='steps-post')  # Draw threshold line connecting inflection points
-    
+
         # Restore the x-axis limits
         self.canvas.axes.set_xlim(xlim)
         # Redraw the canvas
@@ -115,23 +114,23 @@ class ApplicationWindow(QWidget):
         # Initialize the x and y arrays
         x = []
         y = []
- 
+
         inflection_points = self.inflection_points[self.selected_threshold_index].copy()
         if inflection_points[-1][0] < len(self.df)-1:
             inflection_points.append((len(self.df)-1,inflection_points[-1][1]))
-             
+
         # Loop through each segment defined by the inflection points
         for i in range(len(inflection_points)):
             # Get the start and end points for the current segment
             start_point = inflection_points[i]
             end_point = inflection_points[i + 1] if i + 1 < len(inflection_points) else None
-            
+
             # Determine the range of x values for the current segment
             x_range = range(start_point[0], end_point[0] if end_point else start_point[0] + 1)
-            
+
             # Extend the x array
             x.extend(x_range)
-            
+
             # Extend the y array with repeated y values from the start point
             y.extend([start_point[1]] * len(x_range))
         self.thresholds[self.selected_threshold_index] = y
@@ -150,7 +149,7 @@ class ApplicationWindow(QWidget):
                           i + 1, 0) ) #Not zero just unchanged!
             #so need to add these columns more inelligently!
         self.df[self.threshed_col] = self.add_threshs(arrays)
-        
+
     def onclick(self, event):
         # Check if the click is inside the axes
         if event.xdata is None or event.ydata is None:
@@ -167,7 +166,7 @@ class ApplicationWindow(QWidget):
             if len(self.inflection_points[self.selected_threshold_index])>1:
                 self.inflection_points[self.selected_threshold_index][0]=\
                     (0,self.inflection_points[self.selected_threshold_index][1][1])
-                    
+
             self.selected_inflection_index = None
             self.create_threshold()
             self.update_thresholded_signal()
@@ -182,7 +181,7 @@ class ApplicationWindow(QWidget):
                 for index in range(len(self.thresholds), threshold_index + 1):
                     self.thresholds.append(self.df[self.signal_column].median())
                     self.inflection_points[index] = [(0, self.thresholds[index])]
-                
+
             self.selected_threshold_index = threshold_index
             self.numeric_key_pressed = True
         elif event.key.isalpha():
@@ -208,12 +207,12 @@ class ApplicationWindow(QWidget):
         window_width = self.window_slider.value()
         self.canvas.axes.set_xlim(start, start + window_width)
         self.canvas.draw()
-        
+
     #Save dataframe at the end
     def save_dataframe(self):
         new_filename = self.filename.rsplit('.', 1)[0] + '_IDL.parquet'
         self.df.to_parquet(new_filename)
-    
+
     #Catch the end of the window!!
     def closeEvent(self, event):
         self.save_dataframe()
@@ -228,10 +227,10 @@ def main():
     #filename = askopenfilename(filetypes=[("CSV files", "*.csv"),
     #                                      ("Parquet files", "*.parquet"),
     #                                      ("Feather files", "*.feather")])
-    
+
     #root.destroy()
-    
-    
+
+
     dialog = QFileDialog()
     dialog.setFileMode(QFileDialog.AnyFile)
 
@@ -241,14 +240,14 @@ def main():
     else:
         print("No file selected.")
 
-    
+
     msgBox = QMessageBox()
     msgBox.setText("Hit a numeric key to choose the threshold you are working\nand then left click to set the actual threshold level")
     msgBox.setWindowTitle("Instructions")
     msgBox.setStandardButtons(QMessageBox.Ok)
     msgBox.exec()
-    
-    
+
+
     # Load the data
     if "csv" in filename.lower():
         df = pd.read_csv(filename)
@@ -270,7 +269,7 @@ def main():
     # Start the application
     sys.exit( app.exec_() )
 
-    
+
 
 if __name__ == '__main__':
     main()
