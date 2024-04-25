@@ -3,7 +3,6 @@
 Created on Sat Mar 25 2024
 @author: rbj
 """
-
 import sys
 from PyQt5.QtWidgets import QApplication, QVBoxLayout, QWidget, QSlider, QLabel, QMessageBox, QFileDialog
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas, NavigationToolbar2QT as NavigationToolbar
