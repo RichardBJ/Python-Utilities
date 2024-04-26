@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import QApplication, QVBoxLayout, QWidget, QSlider, QLabel,
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas, NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 
 from PyQt5.QtCore import Qt
@@ -162,6 +163,11 @@ class ApplicationWindow(QWidget):
         self.save_dataframe()
         event.accept()
 
+def scale(x, out_range=(0, 1)):
+    domain = np.min(x), np.max(x)
+    y = (x - domain[0]) / (domain[1] - domain[0])
+    scaled_array = y * (out_range[1] - out_range[0]) + out_range[0]
+    return scaled_array
 
 def main():
     # Open a file dialog to select the CSV file
@@ -191,7 +197,8 @@ def main():
         df = pd.read_parquet(filename)
     else:
         df = pd.read_feather(filename)
-
+    maxc = max(df["Channels"])
+    df["Noisy Current"]=scale(df["Noisy Current"],out_range=(0,maxc))
     # Create the application window
     window = ApplicationWindow(df,filename)
     window.show()
