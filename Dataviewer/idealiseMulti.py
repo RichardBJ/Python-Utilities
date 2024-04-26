@@ -127,6 +127,29 @@ class ApplicationWindow(QWidget):
         y_values = [y for x, y in self.inflection_points[threshold_index]]
         slope, intercept, _, _, _ = linregress(x_values, y_values)
         return slope, intercept
+    
+    def euclidean_distance(self, point1, point2):
+        """
+        Calculates the Euclidean distance between two points.
+        """
+        x1, y1 = point1
+        x2, y2 = point2
+        return ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
+
+    def find_closest_tuple(self, data, target_point):
+        """
+        Finds the index of the closest tuple in 'data' to the 'target_point'.
+        """
+        min_distance = float('inf')
+        closest_index = None
+    
+        for i, point in enumerate(data):
+            distance = self.euclidean_distance(point, target_point)
+            if distance < min_distance:
+                min_distance = distance
+                closest_index = i
+  
+        return closest_index
 
     def create_threshold(self):
         # Initialize the x and y arrays
@@ -226,21 +249,16 @@ class ApplicationWindow(QWidget):
             self.remove_triggered = False
         elif event.key == ' ':
             self.remove_triggered = True
-            self.numeric_key_pressed = False
-        
+            self.numeric_key_pressed = False  
 
     def remove_inflection_point(self, x=0, y=0):
         print(f"We are in remove: remove triggered is {self.remove_triggered}")
+        data = self.inflection_points[self.selected_threshold_index]
         # Find the inflection point closest to the click within 50 points
-        min_distance = float('inf')
-        #This fails because inflection_points is a dictionary
-        #Not a simple list
-        for i in self.inflection_points:
-            if abs(i - x) < min_distance and abs(i - x) <= 50:
-                min_distance = abs(i - x)
-                self.selected_inflection_index = i
+        self.selected_inflection_index = self.find_closest_tuple(data, (x,y))
+  
         print(self.selected_inflection_index)
-        del self.inflection_points[self.selected_inflection_index]
+        del self.inflection_points[self.selected_threshold_index][self.selected_inflection_index]
         
         self.create_threshold()
         self.update_thresholded_signal()
@@ -288,9 +306,10 @@ def main():
     else:
         print("No file selected.")
 
-
     msgBox = QMessageBox()
-    msgBox.setText("Hit a numeric key to choose the threshold you are working\nand then left click to set the actual threshold level")
+    msgBox.setText("Hit a numeric key to choose the threshold you are working\n",
+                    "and then left click to set the actual threshold level\n",
+                    "To DELETE use the spacebar")
     msgBox.setWindowTitle("Instructions")
     msgBox.setStandardButtons(QMessageBox.Ok)
     msgBox.exec()
