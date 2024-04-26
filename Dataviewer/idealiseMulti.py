@@ -12,8 +12,6 @@ from matplotlib.figure import Figure
 import numpy as np
 import pandas as pd
 from scipy.stats import linregress
-#import tkinter as tk
-#from tkinter.filedialog import askopenfilename
 
 from PyQt5.QtCore import Qt
 
@@ -30,10 +28,16 @@ class ApplicationWindow(QWidget):
     def __init__(self, df, signal_column, threshed_col, filename):
         super().__init__()
         self.df = df
+        self.x_len = len(df.index)
         self.signal_column = signal_column
         self.threshed_col = threshed_col
         self.filename = filename
         self.numeric_key_pressed = False
+        self.scalerMax=df["Channels"].max()
+        self.domain = None #Holds the range of the original unscaled data
+        #Give the signal a quick scale for visibility
+        self.df[signal_column]=self.scale(self.df[signal_column], max_val=self.scalerMax)
+        
         self.threshold = df[signal_column].median()  # Initial threshold
         # Initial threshold set
         self.thresholds = [df[signal_column].median()]
@@ -43,6 +47,7 @@ class ApplicationWindow(QWidget):
         self.inflection_points = {0: [(0, self.threshold)]}  # Inflection points for each threshold
         self.selected_inflection_index = None
         self.point_index = None
+        self.endpoint_created = False
 
         # Create the matplotlib FigureCanvas object
         self.canvas = MplCanvas(self)
@@ -72,7 +77,7 @@ class ApplicationWindow(QWidget):
         self.window_slider = QSlider(Qt.Horizontal)
         self.window_slider.setMinimum(1)
         self.window_slider.setMaximum(len(df))
-        self.window_slider.setValue(1000)
+        self.window_slider.setValue(2000)
         self.window_slider.valueChanged.connect(self.update_plot)
         vbox.addWidget(QLabel("Window width:"))
         vbox.addWidget(self.window_slider)
@@ -103,6 +108,17 @@ class ApplicationWindow(QWidget):
         self.canvas.axes.set_xlim(xlim)
         # Redraw the canvas
         self.canvas.draw()
+        
+    def scale(self, data, min_val=0, max_val=1):
+        self.domain = np.min(data), np.max(data)
+        y = (data - self.domain[0]) / (self.domain[1] - self.domain[0])
+        scaled_array = y * (max_val - min_val) + min_val
+        return scaled_array
+    
+    def unscale(self, scaled_array) -> np.array:
+        scaled_min, scaled_max = self.domain
+        unscaled_array = (scaled_array - scaled_min) / (scaled_max - scaled_min)
+        return unscaled_array
 
     def calculate_regression_line(self, threshold_index):
         x_values = [x for x, y in self.inflection_points[threshold_index]]
@@ -116,8 +132,8 @@ class ApplicationWindow(QWidget):
         y = []
 
         inflection_points = self.inflection_points[self.selected_threshold_index].copy()
-        if inflection_points[-1][0] < len(self.df)-1:
-            inflection_points.append((len(self.df)-1,inflection_points[-1][1]))
+        """if inflection_points[-1][0] < len(self.df)-1:
+            inflection_points.append((len(self.df)-1,inflection_points[-1][1]))"""
 
         # Loop through each segment defined by the inflection points
         for i in range(len(inflection_points)):
@@ -146,8 +162,8 @@ class ApplicationWindow(QWidget):
         arrays=[]
         for i, threshold in enumerate(sorted_thresholds):
             arrays.append(np.where(self.df[self.signal_column].values > threshold,\
-                          i + 1, 0) ) #Not zero just unchanged!
-            #so need to add these columns more inelligently!
+                          i + 1, 0) ) #Not necessarily zero just above threshold!
+        #so need to add these columns more intelligently!
         self.df[self.threshed_col] = self.add_threshs(arrays)
 
     def onclick(self, event):
@@ -156,7 +172,12 @@ class ApplicationWindow(QWidget):
             self.selected_inflection_index = None
             return
 
+        # Check it is not beyond the last datapoint
+        if int(event.xdata) >= self.x_len:
+            event.xdata = float(self.x_len - 1)
+
         # Add a new inflection point for the selected threshold
+        
         if self.numeric_key_pressed:
             self.inflection_points[self.selected_threshold_index].append((int(event.xdata), event.ydata))
             self.inflection_points[self.selected_threshold_index]=\
@@ -166,6 +187,10 @@ class ApplicationWindow(QWidget):
             if len(self.inflection_points[self.selected_threshold_index])>1:
                 self.inflection_points[self.selected_threshold_index][0]=\
                     (0,self.inflection_points[self.selected_threshold_index][1][1])
+            #Tbh better to set a provisional inflection point at end of record too
+            if not self.endpoint_created:
+                self.inflection_points[self.selected_threshold_index].append((self.x_len - 1, event.ydata))
+                self.endpoint_created=True
 
             self.selected_inflection_index = None
             self.create_threshold()
@@ -181,7 +206,6 @@ class ApplicationWindow(QWidget):
                 for index in range(len(self.thresholds), threshold_index + 1):
                     self.thresholds.append(self.df[self.signal_column].median())
                     self.inflection_points[index] = [(0, self.thresholds[index])]
-
             self.selected_threshold_index = threshold_index
             self.numeric_key_pressed = True
         elif event.key.isalpha():
@@ -211,12 +235,15 @@ class ApplicationWindow(QWidget):
     #Save dataframe at the end
     def save_dataframe(self):
         new_filename = self.filename.rsplit('.', 1)[0] + '_IDL.parquet'
+        self.df[self.signal_column]=self.unscale(self.df[self.signal_column])
         self.df.to_parquet(new_filename)
 
     #Catch the end of the window!!
     def closeEvent(self, event):
         self.save_dataframe()
         event.accept()
+
+
 
 def main():
     # Use tkinter to get the filename
