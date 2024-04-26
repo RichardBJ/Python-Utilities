@@ -33,6 +33,7 @@ class ApplicationWindow(QWidget):
         self.threshed_col = threshed_col
         self.filename = filename
         self.numeric_key_pressed = False
+        self.remove_triggered = False
         self.scalerMax=df["Channels"].max()
         self.domain = None #Holds the range of the original unscaled data
         #Give the signal a quick scale for visibility
@@ -121,6 +122,7 @@ class ApplicationWindow(QWidget):
         return unscaled_array
 
     def calculate_regression_line(self, threshold_index):
+        # Not actually implimented this!
         x_values = [x for x, y in self.inflection_points[threshold_index]]
         y_values = [y for x, y in self.inflection_points[threshold_index]]
         slope, intercept, _, _, _ = linregress(x_values, y_values)
@@ -158,7 +160,11 @@ class ApplicationWindow(QWidget):
         return results
 
     def update_thresholded_signal(self):
-        sorted_thresholds = [sorted(threshold) for threshold in self.thresholds]
+        mean_thresholds = [np.mean(threshold) for threshold in self.thresholds]
+        # Sort the thresholds based on mean threshold values in ascending order
+        sorted_thresholds = [threshold for _,
+                             threshold in sorted(zip(mean_thresholds, self.thresholds))]
+
         arrays=[]
         for i, threshold in enumerate(sorted_thresholds):
             arrays.append(np.where(self.df[self.signal_column].values > threshold,\
@@ -167,6 +173,10 @@ class ApplicationWindow(QWidget):
         self.df[self.threshed_col] = self.add_threshs(arrays)
 
     def onclick(self, event):
+        if self.remove_triggered==True:
+            self.remove_inflection_point(x=event.xdata, y=event.ydata)
+            return
+        
         # Check if the click is inside the axes
         if event.xdata is None or event.ydata is None:
             self.selected_inflection_index = None
@@ -208,22 +218,33 @@ class ApplicationWindow(QWidget):
                     self.inflection_points[index] = [(0, self.thresholds[index])]
             self.selected_threshold_index = threshold_index
             self.numeric_key_pressed = True
+            self.remove_triggered = False
         elif event.key.isalpha():
             #I think I'm doing this anyway so can clear this?
             self.update_thresholded_signal()
             self.numeric_key_pressed = False
+            self.remove_triggered = False
         elif event.key == ' ':
-            self.remove_inflection_point()
+            self.remove_triggered = True
             self.numeric_key_pressed = False
+        
 
-    def remove_inflection_point(self):
-        #Currently non-funcrtional in this version of the application
-        if self.selected_inflection_index is not None:
-            del self.inflection_points[self.selected_threshold_index][self.point_index]
-            self.point_index = None
-            self.selected_inflection_index = None
-            self.update_thresholded_signal()
-            self.draw_plot()
+    def remove_inflection_point(self, x=0, y=0):
+        print(f"We are in remove: remove triggered is {self.remove_triggered}")
+        # Find the inflection point closest to the click within 50 points
+        min_distance = float('inf')
+        #This fails because inflection_points is a dictionary
+        #Not a simple list
+        for i in self.inflection_points:
+            if abs(i - x) < min_distance and abs(i - x) <= 50:
+                min_distance = abs(i - x)
+                self.selected_inflection_index = i
+        print(self.selected_inflection_index)
+        del self.inflection_points[self.selected_inflection_index]
+        
+        self.create_threshold()
+        self.update_thresholded_signal()
+        self.draw_plot()
 
     def update_plot(self, value):
         # Update the plot based on the scrollbar position and window width
