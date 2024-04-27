@@ -10,8 +10,19 @@ from matplotlib.figure import Figure
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-
 from PyQt5.QtCore import Qt
+
+# TODO
+# Get a key catcher so only select when want to this will allow native zoom in too
+# When we select, PRIOR to actually changing the data, un-cornerpoint the record!
+"""
+
+
+
+
+
+
+"""
 
 class ApplicationWindow(QWidget):
     def __init__(self, df, filename):
@@ -75,9 +86,25 @@ class ApplicationWindow(QWidget):
         # Clear the axes
         self.axes.clear()
         # Plot the signal and the thresholded signal
-        #I remmoved time from this so X is just datapoints now...
-        self.axes.plot(self.df["Noisy Current"], 'b', label="Noisy Current")
-        self.axes.plot(self.df["Channels"], 'r', label="Channels")
+        
+        x = self.df.index
+        y = self.df["Channels"]
+        
+        # Calculate the gradient of y
+        gradient = np.gradient(y)
+
+        # Identify corner points (where gradient changes sign)
+        corner_indices = np.where(np.diff(np.sign(gradient)))[0] + 1
+        corner_points = [(x[i], y[i]) for i in corner_indices]
+        #self.axes.plot(self.df["Channels"], 'r',drawstyle='steps-post')
+        
+        self.axes.plot(*zip(*corner_points), 
+                       'r', drawstyle='steps-post')
+        self.axes.scatter(*zip(*corner_points), 
+                    color='red', marker='o')
+        self.axes.scatter(self.df.index ,
+                       self.df["Noisy Current"], 
+                       c='b', s=0.2)
 
         # Draw the selection rectangle
         if self.start_x is not None and self.end_x is not None:
@@ -87,7 +114,7 @@ class ApplicationWindow(QWidget):
 
         # Restore the x-axis limits
         self.axes.set_xlim(xlim)
-        self.axes.legend()
+        #self.axes.legend()
         # Redraw the canvas
         self.canvas.draw()
 
