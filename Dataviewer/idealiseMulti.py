@@ -2,6 +2,10 @@
 """
 Created on Sat Mar 23 16:19:49 2024
 @author: rbj
+
+#This idealises a record, but note that:
+    (1) It creates an enitrely new idealisation alongside the existing one!
+    (2) It seems to be using a channels column called "Thresholded" not Channels?
 """
 
 import sys
@@ -94,9 +98,11 @@ class ApplicationWindow(QWidget):
         # Clear the canvas
         self.canvas.axes.clear()
         # Plot the signal and the thresholded signal
-        self.canvas.axes.plot(self.df[self.signal_column], 'b')
         self.canvas.axes.plot(self.df[self.threshed_col], 'r')
-
+        self.canvas.axes.scatter(self.df.index,
+                                 self.df[self.signal_column], 
+                                 c='b', s=0.1)
+        
 
         # Plot the inflection points and threshold lines
         for threshold_index, inflection_points in self.inflection_points.items():
@@ -285,18 +291,6 @@ class ApplicationWindow(QWidget):
 
 
 def main():
-    # Use tkinter to get the filename
-    # Switched to using pyqt for file open dialogs
-    #root = tk.Tk()
-    #root.withdraw()  # Hide the root window
-    # Open a file dialog to select the CSV file
-    #filename = askopenfilename(filetypes=[("CSV files", "*.csv"),
-    #                                      ("Parquet files", "*.parquet"),
-    #                                      ("Feather files", "*.feather")])
-
-    #root.destroy()
-
-
     dialog = QFileDialog()
     dialog.setFileMode(QFileDialog.AnyFile)
 
@@ -307,13 +301,15 @@ def main():
         print("No file selected.")
 
     msgBox = QMessageBox()
-    msgBox.setText("Hit a numeric key to choose the threshold you are working\n",
-                    "and then left click to set the actual threshold level\n",
-                    "To DELETE use the spacebar")
+    msgBox.setText("Hit a numeric key to choose the threshold you are working\n"
+                    "and then left click to set the actual threshold level\n"
+                    "To DELETE use the spacebar\n"
+                    "To zoom press Z/z"
+                    "hit threshold number afterwards\n"
+                    "only really tested with 1 channel")
     msgBox.setWindowTitle("Instructions")
     msgBox.setStandardButtons(QMessageBox.Ok)
     msgBox.exec()
-
 
     # Load the data
     if "csv" in filename.lower():
