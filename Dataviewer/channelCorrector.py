@@ -32,6 +32,7 @@ class ApplicationWindow(QWidget):
         self.end_x = None
         self.rect = None
         self.remove_triggered=True
+        self.keypressed=None
 
         # Create the matplotlib FigureCanvas object
         self.figure = Figure(figsize=(12, 6), dpi=100)
@@ -224,12 +225,17 @@ class ApplicationWindow(QWidget):
             self.pressed = True
             self.start_x = event.xdata
             #self.remove_triggered==False
+        elif event.button == 1 and self.keypressed=='d':
+            #self.remove_inflection_point(x=event.xdata, y=event.ydata)
+            self.remove_point(event.xdata,event.ydata)
+            self.pressed=False
+            self.start_x=None
         elif event.button == 1:
             #self.remove_inflection_point(x=event.xdata, y=event.ydata)
-            print(event.xdata,event.ydata)
-            self.remove_point(event.xdata,event.ydata)
-            return
-            
+            self.add_point(event.xdata)
+            self.pressed=False
+            self.start_x=None
+                     
     def on_button_release(self, event):
         if event.button == 1 and self.pressed:  # Left mouse button
             self.pressed = False
@@ -260,6 +266,16 @@ class ApplicationWindow(QWidget):
         self.draw_plot()
         return
 
+    def add_point(self, x):
+        try:
+            self.corner_points.append((int(x), self.selected_channels))
+            # Sort the points based on their x-coordinates
+            self.corner_points = sorted(self.corner_points, key=lambda coord: coord[0])
+        except:
+            pass              
+        self.draw_plot()
+        return
+
     def on_key_press(self, event):
         if event.key.lower() == 'c':  # Check if the key pressed is 'c'
             self.numeric_key_pressed = False
@@ -269,9 +285,15 @@ class ApplicationWindow(QWidget):
                     patch.remove()
             self.rect = None  # Reset the self.rect attribute
             self.canvas.draw()  # Redraw the canvas
+        elif event.key.lower() == 'd': 
+            #we are going to delete a point
+            self.numeric_key_pressed = False
+            self.keypressed = 'd'  
+            self.start_x = None
         elif event.key.isdigit():
             self.selected_channels = int(event.key) if int(event.key) >= 0 else int(event.key)
             self.numeric_key_pressed = True
+            self.keypressed = None  
 
     def update_plot(self):
         # Get the current scrollbar position and window width
@@ -318,7 +340,9 @@ def main():
     +"\n0 - Press 0 = 0 channels open"\
     +"\n1 - Press 1 = 1 channel open et seq" \
     +"\n2 - select the region with shift left-click drag" \
-    +"\n3 - Press c to clear the rectangle"
+    +"\n3 - Press a to add a point" \
+    +"\n4 - Number THEN click creates event" \
+    +"\n5 - Press c to clear the rectangle"
 
     msgBox = QMessageBox()
     msgBox.setText(msg)
