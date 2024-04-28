@@ -70,7 +70,8 @@ if file_paths:
                 
             elif nc == 3:
                 # Then we have Simple time format and wish to convert to Sam format
-                df.columns = ["Time", "Noisy Current", "Channels"]
+                if not "Noisy Current" in df.columns:
+                    df.columns = ["Time", "Noisy Current", "Channels"]
                 df['State of Channel 0'] = df.apply(
                     lambda row: f"C{int(row['Channels'])}" if row['Channels'] == 0 else f"O{int(row['Channels'])}",
                     axis=1
