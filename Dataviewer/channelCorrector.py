@@ -351,8 +351,15 @@ def main():
     msgBox.exec()
 
     # Load the data
-    if "csv" in filename.lower():
+    if ".csv" in filename.lower():
         df = pd.read_csv(filename)
+    elif ".txt" in filename.lower():    
+        try:
+            df = pd.read_csv(filename, sep='\t',
+                             header=None)
+        except:
+            df = pd.read_csv(filename, sep='\\s+',
+                             header=None)
     elif "parquet" in filename.lower():
         df = pd.read_parquet(filename)
     else:
