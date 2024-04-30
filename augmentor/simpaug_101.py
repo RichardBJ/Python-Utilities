@@ -5,13 +5,12 @@ Created on Sat Mar 16 09:12:56 2024
 
 @author: rbj
 """
-import tkinter as tk
-from tkinter import filedialog, simpledialog
 import pandas as pd
 import numpy as np
 import os
 import sys
 from scipy import signal
+from PyQt5.QtWidgets import QApplication, QFileDialog, QInputDialog
 USESCIPY = True
 
 def augment_dataframe(file, df, num_copies):
@@ -67,11 +66,11 @@ def augment_dataframe(file, df, num_copies):
     return 0
 
 def process_and_save_selected_dataframes():
+    app = QApplication(sys.argv)
     # Ask the user to select specific Parquet files for processing
-    selected_files = filedialog.askopenfilenames(title="Select Parquet files to process", filetypes=[("Parquet files", "*.parquet")])
-    copies = simpledialog.askinteger("Number of copies", 
-                                     "Integer value:")
-    if not copies:
+    selected_files, _ = QFileDialog.getOpenFileNames(None, "Select Parquet files to process", "", "Parquet files (*.parquet)")
+    copies, ok = QInputDialog.getInt(None, "Number of copies", "Integer value:")
+    if not ok:
         sys.exit("No copies set")
     # Check if any files were selected
     if not selected_files:
@@ -90,6 +89,4 @@ def process_and_save_selected_dataframes():
             print(f"Error processing {filename}: {str(e)}")
 
 if __name__ == "__main__":
-    root = tk.Tk()
-    root.withdraw()  # Hide the main Tkinter window
     process_and_save_selected_dataframes()
