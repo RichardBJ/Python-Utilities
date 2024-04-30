@@ -99,18 +99,14 @@ class ApplicationWindow(QWidget):
         if False:
         # Calculate the gradient of y old way
             gradient = np.gradient(y)
-        
             # Identify corner points (where gradient changes sign)
             corner_indices = np.where(np.diff(np.sign(gradient)))[0] + 1
-        
             # Handle the first constant flat section
             if gradient[0] == 0:
                 corner_indices = np.insert(corner_indices, 0, 0)
-        
             # Handle the last constant flat section
             if gradient[-1] == 0:
                 corner_indices = np.append(corner_indices, len(y) - 1)
-        
             corner_points = [(x[i], y[i]) for i in corner_indices]
     
         return corner_points
@@ -230,7 +226,9 @@ class ApplicationWindow(QWidget):
             self.remove_point(event.xdata,event.ydata)
             self.pressed=False
             self.start_x=None
-        elif event.button == 1:
+            
+        #Just use matplotlib zoom if click with z pressed
+        elif event.button == 1 and not event.key == 'z': 
             #self.remove_inflection_point(x=event.xdata, y=event.ydata)
             self.add_point(event.xdata)
             self.pressed=False
@@ -290,6 +288,8 @@ class ApplicationWindow(QWidget):
             self.numeric_key_pressed = False
             self.keypressed = 'd'  
             self.start_x = None
+        elif event.key.lower() == 'h':
+            helpDialog()
         elif event.key.isdigit():
             self.selected_channels = int(event.key) if int(event.key) >= 0 else int(event.key)
             self.numeric_key_pressed = True
@@ -305,14 +305,21 @@ class ApplicationWindow(QWidget):
 
         # Redraw the canvas
         self.canvas.draw()
+        
+    def ask_save(self):
+        confirmation = QMessageBox.question(self, "Save Or Not", "Do you want to save the file?", QMessageBox.Yes | QMessageBox.No)
+        if confirmation == QMessageBox.Yes:
+            return True
+        else:
+            return False
 
     #Save dataframe at the end
     def save_dataframe(self):
-        # TODO I think this needs unscaling!
-        Channels = self.uncorner()
-        self.df["Channels"] = Channels
-        new_filename = self.filename.rsplit('.', 1)[0] + '_COR.parquet'
-        self.df.to_parquet(new_filename)
+        if self.ask_save() == True:
+            Channels = self.uncorner()
+            self.df["Channels"] = Channels
+            new_filename = self.filename.rsplit('.', 1)[0] + '_COR.parquet'
+            self.df.to_parquet(new_filename)
 
     #Catch the end of the window!!
     def closeEvent(self, event):
@@ -326,6 +333,24 @@ def scale(x, out_range=(0, 1)):
     scaled_array = y * (out_range[1] - out_range[0]) + out_range[0]
     return scaled_array
 
+def helpDialog():
+    msg = "HIT A NUMBER FIRST, then shift-drag-select a bit of trace:" \
+    +"\n- Press 0 = 0 channels open"\
+    +"\n- Press 1 = 1 channel open et seq" \
+    +"\n- HIT A NUMBER FIRST, then just click to add a point" \
+    +"\n- Npress a THEN click to delete a point" \
+    +"\n- Press c to clear the rectangle"\
+    +"\n- HOLD z and click the zoom to then zoom in. Scroll or home to end"\
+    +"\n- PRESS H ANYTIME TO GET THIS HELP MENU AGAIN"
+
+    msgBox = QMessageBox()
+    msgBox.setText(msg)
+    msgBox.setWindowTitle("Instructions")
+    msgBox.setStandardButtons(QMessageBox.Ok)
+    msgBox.exec()
+    return
+
+
 def main():
     # Open a file dialog to select the CSV file
     dialog = QFileDialog()
@@ -336,19 +361,8 @@ def main():
     else:
         print("No file selected.")
         return
-    msg = "HIT A NUMBER FIRST, then select a bit of trace:" \
-    +"\n0 - Press 0 = 0 channels open"\
-    +"\n1 - Press 1 = 1 channel open et seq" \
-    +"\n2 - select the region with shift left-click drag" \
-    +"\n3 - Press a to add a point" \
-    +"\n4 - Number THEN click creates event" \
-    +"\n5 - Press c to clear the rectangle"
-
-    msgBox = QMessageBox()
-    msgBox.setText(msg)
-    msgBox.setWindowTitle("Instructions")
-    msgBox.setStandardButtons(QMessageBox.Ok)
-    msgBox.exec()
+    
+    helpDialog()
 
     # Load the data
     if ".csv" in filename.lower():
