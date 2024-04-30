@@ -151,7 +151,8 @@ class ApplicationWindow(QWidget):
         #self.axes.plot(self.df["Channels"], 'r',drawstyle='steps-post')
         
         self.axes.plot(*zip(*self.corner_points), 
-                       'r', drawstyle='steps-post')
+                       'r', linestyle='--', 
+                       drawstyle='steps-post')
         self.axes.scatter(*zip(*self.corner_points), 
                     color='red', marker='o')
         self.axes.scatter(self.df.index ,
