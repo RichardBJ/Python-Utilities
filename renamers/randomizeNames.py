@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 """
 Created on Thu Mar 14 10:16:07 2024
+THIS version prepends a random number to the beginning of all the filenames
+so you can then order by name and drag a random selection to 
+training/testing/validating.
 
 @author: rbj
 """
