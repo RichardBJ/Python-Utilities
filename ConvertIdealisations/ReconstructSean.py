@@ -24,6 +24,7 @@ from tkinter import messagebox
 from tkinter.filedialog import askdirectory
 
 FILETYPE="abf"
+TIMEFACTOR = 0.001
 
 # Create the root Tk window
 root = tk.Tk()
@@ -176,6 +177,7 @@ for i in range(len(idlfiles) ):
         df["Channels"]=idldata[i]
         print(f"OUTPUTTING TO {outfiles[i]}")
         df.columns = ["Time","Noisy Current", "Channels"]
+        df["Time"] = df["Time"] * TIMEFACTOR
         df.to_parquet(outfiles[i], index=False)
     except:
         print("Error probably file length mismatch\n",

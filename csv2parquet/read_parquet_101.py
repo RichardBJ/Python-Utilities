@@ -48,16 +48,16 @@ if file_paths:
             # Read the CSV file with pandas
             df = pd.read_csv(file_path)
         if file_path.endswith('.txt'):
-            # Read the txt file with pandas Have to use python engine to allow
-            # Either tab or space
-            df = pd.read_csv(file_path, sep="\s", engine='python',
-                             header=None, skiprows=1)
+            try:
+                df = pd.read_csv(file_path, sep='\t')
+            except:
+                df = pd.read_csv(file_path, sep='\\s+')
         elif file_path.endswith('.parquet'):
             # Read the Parquet file with pandas
             df = pd.read_parquet(file_path)
         df.reset_index(drop=True, inplace=True)
         print(file_path)
-        #print(df.info())
+        print(df.info())
         print(df.head())
 
         if convert:
@@ -67,7 +67,7 @@ if file_paths:
                 df.columns = ["Noisy Current"]
                 #So add time column
                 df["Time"] = np.arange(0, len(df) * SI, SI)
-                
+
             elif nc == 3:
                 # Then we have Simple time format and wish to convert to Sam format
                 if not "Noisy Current" in df.columns:
