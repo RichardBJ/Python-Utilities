@@ -19,6 +19,7 @@ from PyQt5.QtCore import Qt
 class ApplicationWindow(QWidget):
     def __init__(self, df, filename):
         super().__init__()
+        self.setWindowTitle(filename)
         self.df = df
         self.filename = filename
         self.corner_points = None
@@ -39,7 +40,7 @@ class ApplicationWindow(QWidget):
         self.canvas = FigureCanvas(self.figure)
         self.canvas.setFocusPolicy(Qt.StrongFocus)
         self.canvas.setFocus()
-        self.axes = self.figure.add_subplot(111)  # Create the axes here
+        self.axes = self.figure.add_subplot(111)
 
         self.canvas.mpl_connect('button_press_event', self.on_button_press)
         self.canvas.mpl_connect('button_release_event', self.on_button_release)
@@ -379,7 +380,22 @@ def main():
         df = pd.read_parquet(filename)
     else:
         df = pd.read_feather(filename)
-    maxc = max(df["Channels"])
+    # coumn file types sometimes screwed!
+    try:
+        if not pd.api.types.is_numeric_dtype(df["Time"]):
+            df["Time"] = df["Time"].astype("float32")
+    except:
+        print("\nApparently no time column?")
+    try:
+       if "Channels" in df.columns:
+           if not pd.api.types.is_integer_dtype(df["Channels"]):
+               df["Channels"] = df["Channels"].astype("int32")
+    except:
+        print("\nApparently no Channels column!!?")
+    
+        
+    
+    maxc = max(df["Channels"].to_numpy())
     df["Noisy Current"]=scale(df["Noisy Current"],out_range=(0,maxc))
     # Create the application window
     window = ApplicationWindow(df,filename)

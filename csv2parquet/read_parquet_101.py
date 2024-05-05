@@ -55,6 +55,7 @@ if file_paths:
         elif file_path.endswith('.parquet'):
             # Read the Parquet file with pandas
             df = pd.read_parquet(file_path)
+            
         df.reset_index(drop=True, inplace=True)
         print(file_path)
         print(df.info())
