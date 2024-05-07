@@ -36,8 +36,8 @@ class FileDialogApp(QApplication):
                 window_size = 10
                 dtw_distance = calculate_dtw(
                     df, "y_True", "y_Predict", window_size)
-                df.plot()
-                print(f"\nDTW distance: {dtw_distance:.4f}",end="")
+                
+                print(f"DTW distance: {dtw_distance:.4f},",end="")
 
                 # Compute macro F1 score
                 y_True = df.loc[:,"y_True"].values

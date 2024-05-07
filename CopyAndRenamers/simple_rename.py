@@ -8,13 +8,14 @@ import os
 import tkinter as tk
 from tkinter import filedialog
 
-REPLACE = "generated_data_mixed_"
+REPLACE = "data"
+WITH = "Nav_one_channel_nodrift"
 
 def rename_files_in_subfolders(parent_directory):
     for dirpath, dirnames, filenames in os.walk(parent_directory):
         for filename in filenames:
             if REPLACE in filename:
-                new_filename = filename.replace(REPLACE, "")
+                new_filename = filename.replace(REPLACE, WITH)
                 old_file_path = os.path.join(dirpath, filename)
                 new_file_path = os.path.join(dirpath, new_filename)
                 os.rename(old_file_path, new_file_path)
