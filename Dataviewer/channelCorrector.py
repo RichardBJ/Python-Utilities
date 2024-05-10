@@ -74,29 +74,25 @@ class ApplicationWindow(QWidget):
         print(f"Initial data length = {len(self.df)}")
         self.corner_points = self.make_corners()
         print(f"Uncornered data length = {len(self.uncorner())}")
-
         self.setLayout(vbox)
 
         # Draw the initial plot
         self.draw_plot()
-            
+
     def make_corners(self):
         x = self.df.index
         y = self.df["Channels"]
         print(len(y))
         #Trying another way get diffs
         diffs = np.diff(y)
-        
         #Then be sure first and last points captured
         diff_first = diffs.nonzero()[0][0]
         diff_last = diffs.nonzero()[0][-1]
-
         diffs = np.insert(diffs,0, 1)
         diffs[-1] = 1
         corner_indices = diffs.nonzero()[0]
         corner_points = [(x[i], y[i]) for i in corner_indices]
         #TODO Gonna need to change the first and last points so there is no slope
-    
         if False:
         # Calculate the gradient of y old way
             gradient = np.gradient(y)
@@ -109,23 +105,19 @@ class ApplicationWindow(QWidget):
             if gradient[-1] == 0:
                 corner_indices = np.append(corner_indices, len(y) - 1)
             corner_points = [(x[i], y[i]) for i in corner_indices]
-    
         return corner_points
-    
+
     def uncorner(self):
         # Extract x and y values from corner points
         x_values, y_values = zip(*self.corner_points)
-    
         # Initialize lists to store reconstructed data points
         X = []
         Y = []
-    
         if False:
             # Handle the first corner point (if it's the first index)
             if x_values[0] == self.df.index[0]:
                 X.append(x_values[0])
                 Y.append(y_values[0])
-    
         # Reconstruct data points between corner points
         for i in range(1, len(x_values)):
             start_x = x_values[i-1]
@@ -138,7 +130,6 @@ class ApplicationWindow(QWidget):
         X=X+[x_values[-1]]
         Y=Y+[y_values[-1]]
         # No need to handle the last corner point separately
-    
         # Return the reconstructed y_values
         return Y
 
@@ -148,16 +139,15 @@ class ApplicationWindow(QWidget):
         # Clear the axes
         self.axes.clear()
         # Plot the signal and the thresholded signal
-        
         #self.axes.plot(self.df["Channels"], 'r',drawstyle='steps-post')
-        
-        self.axes.plot(*zip(*self.corner_points), 
-                       'r', linestyle='--', 
+
+        self.axes.plot(*zip(*self.corner_points),
+                       'r', linestyle='--',
                        drawstyle='steps-post')
-        self.axes.scatter(*zip(*self.corner_points), 
+        self.axes.scatter(*zip(*self.corner_points),
                     color='red', marker='o')
         self.axes.scatter(self.df.index ,
-                       self.df["Noisy Current"], 
+                       self.df["Noisy Current"],
                        c='b', s=0.2)
 
         if self.start_x is not None and self.end_x is not None:
@@ -185,7 +175,6 @@ class ApplicationWindow(QWidget):
         # Redraw the canvas
         self.canvas.draw()
 
-
     def euclidean_distance(self, point1, point2):
         """
         Calculates the Euclidean distance between two points.
@@ -200,13 +189,13 @@ class ApplicationWindow(QWidget):
         """
         min_distance = 10
         closest_index = None
-    
+
         for i, point in enumerate(data):
             distance = self.euclidean_distance(point, target_point)
             if distance < min_distance:
                 min_distance = distance
                 closest_index = i
-  
+
         return closest_index
 
     def select_region(self, start_x, end_x):
@@ -228,14 +217,14 @@ class ApplicationWindow(QWidget):
             self.remove_point(event.xdata,event.ydata)
             self.pressed=False
             self.start_x=None
-            
+
         #Just use matplotlib zoom if click with z pressed
-        elif event.button == 1 and not event.key == 'z': 
+        elif event.button == 1 and not event.key == 'z':
             #self.remove_inflection_point(x=event.xdata, y=event.ydata)
             self.add_point(event.xdata)
             self.pressed=False
             self.start_x=None
-                     
+
     def on_button_release(self, event):
         if event.button == 1 and self.pressed:  # Left mouse button
             self.pressed = False
@@ -262,7 +251,7 @@ class ApplicationWindow(QWidget):
             del self.corner_points[index]
         except:
             pass
-                
+
         self.draw_plot()
         return
 
@@ -272,7 +261,7 @@ class ApplicationWindow(QWidget):
             # Sort the points based on their x-coordinates
             self.corner_points = sorted(self.corner_points, key=lambda coord: coord[0])
         except:
-            pass              
+            pass
         self.draw_plot()
         return
 
@@ -285,17 +274,17 @@ class ApplicationWindow(QWidget):
                     patch.remove()
             self.rect = None  # Reset the self.rect attribute
             self.canvas.draw()  # Redraw the canvas
-        elif event.key.lower() == 'd': 
+        elif event.key.lower() == 'd':
             #we are going to delete a point
             self.numeric_key_pressed = False
-            self.keypressed = 'd'  
+            self.keypressed = 'd'
             self.start_x = None
         elif event.key.lower() == 'h':
             helpDialog()
         elif event.key.isdigit():
             self.selected_channels = int(event.key) if int(event.key) >= 0 else int(event.key)
             self.numeric_key_pressed = True
-            self.keypressed = None  
+            self.keypressed = None
 
     def update_plot(self):
         # Get the current scrollbar position and window width
@@ -307,7 +296,7 @@ class ApplicationWindow(QWidget):
 
         # Redraw the canvas
         self.canvas.draw()
-        
+
     def ask_save(self):
         confirmation = QMessageBox.question(self, "Save Or Not", "Do you want to save the file?", QMessageBox.Yes | QMessageBox.No)
         if confirmation == QMessageBox.Yes:
@@ -363,13 +352,13 @@ def main():
     else:
         print("No file selected.")
         return
-    
+
     helpDialog()
 
     # Load the data
     if ".csv" in filename.lower():
         df = pd.read_csv(filename)
-    elif ".txt" in filename.lower():    
+    elif ".txt" in filename.lower():
         try:
             df = pd.read_csv(filename, sep='\t',
                              header=None)
@@ -392,9 +381,9 @@ def main():
                df["Channels"] = df["Channels"].astype("int32")
     except:
         print("\nApparently no Channels column!!?")
-    
-        
-    
+
+
+
     maxc = max(df["Channels"].to_numpy())
     df["Noisy Current"]=scale(df["Noisy Current"],out_range=(0,maxc))
     # Create the application window
