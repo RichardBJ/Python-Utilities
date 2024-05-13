@@ -13,15 +13,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PyQt5.QtCore import Qt
 
+MAXROWS=100000
+
+
 class ApplicationWindow(QWidget):
-    def __init__(self, df, filename, file_list):
+    def __init__(self, df, freeformat, filename, file_list):
         super().__init__()
         self.setWindowTitle(filename)
-        maxc = max(abs(df["Channels"].to_numpy()))
-        df["Noisy Current"] = scale(df["Noisy Current"], out_range=(0, maxc))
+        #maxc = max(abs(df["Channels"].to_numpy()))
+        #df["Noisy Current"] = scale(df["Noisy Current"], out_range=(0, maxc))
         self.df = df
         self.filename = filename
         self.file_list = file_list
+        self.freeformat = freeformat
         self.current_file_index = file_list.index(filename)
 
         # Create the matplotlib FigureCanvas object
@@ -57,7 +61,8 @@ class ApplicationWindow(QWidget):
         vbox.addWidget(self.window_slider)
 
         self.setLayout(vbox)
-        self.corner_points = self.make_corners()
+        if not self.freeformat:
+            self.corner_points = self.make_corners()
 
         # Draw the initial plot
         self.draw_plot()
@@ -111,7 +116,12 @@ class ApplicationWindow(QWidget):
                        drawstyle='steps-post')
         self.axes.scatter(*zip(*self.corner_points),
                     color='red', marker='o')
-        self.axes.scatter(self.df.index ,
+        if not self.freeformat:
+            self.axes.scatter(self.df.index ,
+                           self.df.iloc[:,1],
+                           c='b', s=0.2)
+        else:
+            self.axes.scatter(self.df.index ,
                        self.df["Noisy Current"],
                        c='b', s=0.2)
 
@@ -138,7 +148,7 @@ class ApplicationWindow(QWidget):
                 next_file = self.file_list[self.current_file_index + 1]
                 self.open_file(next_file)
                 self.update_plot()
-                event.ignore()
+                event.accept()
             else:
                 event.accept()
         else:
@@ -164,18 +174,24 @@ class ApplicationWindow(QWidget):
                 df["Time"] = df["Time"].astype("float32")
         except:
             print("\nApparently no time column?")
-        try:
-            if "Channels" in df.columns:
-                if not pd.api.types.is_integer_dtype(df["Channels"]):
-                    df["Channels"] = df["Channels"].astype("int32")
-        except:
+        
+        if "Channels" in df.columns:
+            if not pd.api.types.is_integer_dtype(df["Channels"]):
+                df["Channels"] = df["Channels"].astype("int32")
+            maxc = max(abs(df["Channels"].to_numpy()))
+        else:
             print("\nApparently no Channels column!!?")
-
-        maxc = max(abs(df["Channels"].to_numpy()))
-        df["Noisy Current"] = scale(df["Noisy Current"], out_range=(0, maxc))
-
+            maxc = 1
+        
+        if "Noisy Current" in df.columns:
+            df["Noisy Current"] = scale(df["Noisy Current"], out_range=(0, maxc))
+        else:
+            print("\nApparently no Noisy Current column!!?")
+            freeformat = True
+            
+        
         # Create a new ApplicationWindow for the loaded file
-        self.new_window = ApplicationWindow(df, filename, self.file_list)
+        self.new_window = ApplicationWindow(df, freeformat, filename, self.file_list)
         self.new_window.show()
         self.close()
 
@@ -187,6 +203,7 @@ def scale(x, out_range=(0, 1)):
 
 def main():
     # Get a list of files
+    freeformat = False
     file_dialog = QFileDialog()
     file_dialog.setFileMode(QFileDialog.ExistingFiles)
     if file_dialog.exec_():
@@ -196,25 +213,35 @@ def main():
         return
 
     # Open the first file
-    filename = file_list[0]
-    if ".csv" in filename.lower():
-        df = pd.read_csv(filename)
-    elif ".txt" in filename.lower():
-        try:
-            df = pd.read_csv(filename, sep='\t', header=None)
-        except:
-            df = pd.read_csv(filename, sep='\\s+', header=None)
-    elif "parquet" in filename.lower():
-        df = pd.read_parquet(filename)
-    else:
-        df = pd.read_feather(filename)
+    for filename in file_list:
+        if ".csv" in filename.lower():
+            df = pd.read_csv(filename)
+        elif ".txt" in filename.lower():
+            try:
+                df = pd.read_csv(filename, sep='\t', header=None)
+            except:
+                df = pd.read_csv(filename, sep='\\s+', header=None)
+        elif "parquet" in filename.lower():
+            df = pd.read_parquet(filename)
+        else:
+            df = pd.read_feather(filename)
+        df = df.iloc[:MAXROWS,:]
+        # Create the application window
+        window = ApplicationWindow(df, freeformat, filename, file_list)
+        window.show()
 
-    # Create the application window
-    window = ApplicationWindow(df, filename, file_list)
-    window.show()
+        # Start the application
+        sys.exit(app.exec_())
+        
+        reply = QMessageBox.question(None,'Open Next File',
+                'Do you want to open the next file?',
+                 QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            continue
+        else:
+            break
 
-    # Start the application
-    sys.exit(app.exec_())
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
