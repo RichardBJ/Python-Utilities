@@ -10,8 +10,8 @@ Create: FOLDER with raw and idl folders within
  Other files can be present UNLESS they are one our formats txy, csv parquet that would screw us.
  \
      NEEDS A COMBO FOLDER FOR OUTPUT TO "combo"
-     
-     
+
+
      CURRENT VERSION CREATES AN ERRONEOUS FINAL STATE!
 """
 import os
@@ -23,8 +23,9 @@ import tkinter as tk
 from tkinter import messagebox
 from tkinter.filedialog import askdirectory
 
-FILETYPE="abf"
-TIMEFACTOR = 0.001
+FILETYPE="abf" #Not actually the file type, but the type of file.
+#File type itself will really be txt, csv or parquet
+TIMEFACTOR = 0.005
 
 # Create the root Tk window
 root = tk.Tk()
@@ -36,10 +37,10 @@ root.update()
 root.withdraw()
 messagebox.showinfo("Instructions", "All the files should be in subfolders:\n"
 					"1. Select the superfolder\n"
-					"2. Within this there must be exactly 2 subfolders\n"
-					"3. One folder is raw and one folder is idl output is going in combo\n"
+					"2. Within this there must be exactly 3 subfolders\n"
+					"3. (A) raw (B) idl. Output goes into (C) combo\n"
                     "4. Every csv/txt/parquet file prefix in raw must also be in idl\n"
-                    "5. For coding convience we expect filetype to be the same if it isn't, convert first"
+                    "5. For coding convience we expect filetype to be the same if it isn't, convert first\n"
                     "6. Obviously the raw contains raw with/without time, the ideal is QUB format IDL")
 
 
@@ -96,11 +97,11 @@ def parse_qub_idealisation(data:pd.DataFrame) -> np.array:
         lambda x: grouped[float(x)])
     return data["Channels"].to_numpy()
 
-def parse_abf_idealisation(idldf:pd.DataFrame, 
+def parse_abf_idealisation(idldf:pd.DataFrame,
                            rawtime:np.array) -> np.array:
     need = [2,4,5]
     times = idldf.loc[:,need]
-    times.columns = ["State","Start","Stop"] 
+    times.columns = ["State","Start","Stop"]
     idl = [int(0)] * len(rawtime)
     for index, row in times.iterrows():
         startRow = find_row(rawtime,row["Start"])
@@ -134,7 +135,21 @@ for i, file in enumerate(idlfiles):
         print(f"pandizing {file}")
         idldfs.append(pandize(file))
         print(f"Pandizing {rawfiles[i]}")
-        rawdfs.append(pandize(rawfiles[i]))
+        #Sometimes Sean's raw files have time sometimes not.
+        #It needs time!
+        tdf = pandize(rawfiles[i])
+        if len(tdf.columns) == 2:
+            #Presumably columns are
+            tdf.columns = ["Time","Noisy Current"]
+            rawdfs.append(tdf)
+        elif len(tdf.columns) == 1:
+            #Presumably have to then add a time column
+            tdf.columns = ["Noisy Current"]
+            tdf["Time"]=tdf.index * TIMEFACTOR
+            rawdfs.append(tdf)
+        else:
+            print("PRETTY BAD ERROR AROUND LINE 151")
+
         #In theory these should now be only the ones where no errors above!
         good_idls.append(file)
         good_raws.append(rawfiles[i])
@@ -158,26 +173,24 @@ del good_outputs
 
 idldata = []
 for i, df in enumerate(idldfs):
-    print(f"Creating idealisation of df {i}/{len(idldfs)-1}")
+    print(f"Creating idealisation of df {i+1}/{len(idldfs)}")
     if FILETYPE.lower() == "qub":
         idldata.append(parse_qub_idealisation(df))
     else:
         try:
             idldata.append(
-                parse_abf_idealisation(df,rawdfs[i].loc[:,0]))
+                parse_abf_idealisation(df,rawdfs[i].loc[:,"Time"]))
         except:
-            pass           
+            pass
 
 #Idlfiles should be the proper list of files now
 for i in range(len(idlfiles) ):
-    print(f"sticking together file {i} of {len(idldata)-1}\n\n")
+    print(f"\nsticking together file {i} of {len(idldata)-1}")
     df=rawdfs[i]
 
     try:
         df["Channels"]=idldata[i]
         print(f"OUTPUTTING TO {outfiles[i]}")
-        df.columns = ["Time","Noisy Current", "Channels"]
-        df["Time"] = df["Time"] * TIMEFACTOR
         df.to_parquet(outfiles[i], index=False)
     except:
         print("Error probably file length mismatch\n",

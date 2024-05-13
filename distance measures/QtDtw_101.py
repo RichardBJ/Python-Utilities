@@ -8,6 +8,7 @@ import sys
 from PyQt5.QtWidgets import QApplication, QFileDialog
 from PyQt5.QtCore import QTimer
 import pandas as pd
+from sklearn.metrics import f1_score
 from tslearn.metrics import dtw
 
 def calculate_dtw(df, col1, col2,window_size):
@@ -35,8 +36,18 @@ class FileDialogApp(QApplication):
                 window_size = 10
                 dtw_distance = calculate_dtw(
                     df, "y_True", "y_Predict", window_size)
-                df.plot()
-                print(f"DTW distance: {dtw_distance}")
+                
+                print(f"DTW distance: {dtw_distance:.4f},",end="")
+
+                # Compute macro F1 score
+                y_True = df.loc[:,"y_True"].values
+                y_Predict = df.loc[:,"y_Predict"].values
+                macro_f1 = f1_score(y_True, y_Predict, average='macro')
+                print(f"Macro F1 Score: {macro_f1:.4f},", end="")
+                
+                # Compute micro F1 score
+                micro_f1 = f1_score(y_True, y_Predict, average='micro')      
+                print(f"Micro F1 Score: {micro_f1:.4f}")
         QTimer.singleShot(0, self.quit)
         self.quit()
 
