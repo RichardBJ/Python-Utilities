@@ -116,7 +116,7 @@ class ApplicationWindow(QWidget):
                        drawstyle='steps-post')
         self.axes.scatter(*zip(*self.corner_points),
                     color='red', marker='o')
-        if not self.freeformat:
+        if self.freeformat:
             self.axes.scatter(self.df.index ,
                            self.df.iloc[:,1],
                            c='b', s=0.2)
@@ -174,7 +174,7 @@ class ApplicationWindow(QWidget):
                 df["Time"] = df["Time"].astype("float32")
         except:
             print("\nApparently no time column?")
-        
+
         if "Channels" in df.columns:
             if not pd.api.types.is_integer_dtype(df["Channels"]):
                 df["Channels"] = df["Channels"].astype("int32")
@@ -182,14 +182,14 @@ class ApplicationWindow(QWidget):
         else:
             print("\nApparently no Channels column!!?")
             maxc = 1
-        
+
         if "Noisy Current" in df.columns:
             df["Noisy Current"] = scale(df["Noisy Current"], out_range=(0, maxc))
         else:
             print("\nApparently no Noisy Current column!!?")
             freeformat = True
-            
-        
+
+
         # Create a new ApplicationWindow for the loaded file
         self.new_window = ApplicationWindow(df, freeformat, filename, self.file_list)
         self.new_window.show()
@@ -232,7 +232,7 @@ def main():
 
         # Start the application
         sys.exit(app.exec_())
-        
+
         reply = QMessageBox.question(None,'Open Next File',
                 'Do you want to open the next file?',
                  QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
