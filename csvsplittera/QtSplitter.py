@@ -21,7 +21,7 @@ if parquet_file_path:
     df = pd.read_parquet(parquet_file_path)
 
     # Define the number of splits
-    num_splits = 10  # Change this to your desired number of splits
+    num_splits = 5  # Change this to your desired number of splits
 
     # Calculate the length of each split
     split_len = math.floor(len(df) / num_splits)
