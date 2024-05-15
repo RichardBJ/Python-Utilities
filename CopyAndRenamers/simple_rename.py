@@ -8,8 +8,8 @@ import os
 import tkinter as tk
 from tkinter import filedialog
 
-REPLACE = "data"
-WITH = "Nav_one_channel_nodrift"
+REPLACE = "Nav"
+WITH = "Nav3"
 
 def rename_files_in_subfolders(parent_directory):
     for dirpath, dirnames, filenames in os.walk(parent_directory):
