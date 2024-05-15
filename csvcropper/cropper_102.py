@@ -22,10 +22,11 @@ SI = 50e-6
 # TODO: Display that and check!!
 
 text1 = input("keep FROM X POINT\n")  # Python 3
-text2 = input("retain UNTIL X POINT 0=keep until end!\n")
+text2 = input("retain UNTIL X POINT 0=keep until end!\n Negative number = from end\n")
 
 skiprows=int(text1)
-until = int(text2)-skiprows
+until = int(text2)
+
 
 # Create the root Tk window
 root = tk.Tk()
@@ -66,23 +67,30 @@ if file_paths:
         print(df.info())
         print(df.head())
         
-        if until <= 0:
-            #Do until the end
+        if until == 0:
             until = len(df)
+        elif until < 0:
+            #Do until the end
+            until = len(df) - until
+        else:
+            until = until - skiprows
         df = df.iloc[skiprows:until,:]
 
         if file_path.endswith('.csv'):
-            df.to_csv(file_path, index=False)
+            save_path = file_path.replace('.csv', '_crp.parquet')
+            df.to_csv(save_path, index=False)
         elif file_path.endswith('.txt'):
             #Hate these ...saving as parquet
-            save_path = file_path.replace('.txt', '.parquet')
+            save_path = file_path.replace('.txt', '_crp.parquet')
             df.to_parquet(save_path, index=False)
         elif file_path.endswith('.parquet'):
             # Save as Parquet
-            df.to_parquet(file_path, index=False)
+            save_path = file_path.replace('.parquet', '_crp.parquet')
+            df.to_parquet(save_path, index=False)
         elif file_path.endswith('.feather'):
             # Save as feather
-            df.to_feather(file_path, index=False)
+            save_path = file_path.replace('.feather', '_crp.feather')
+            df.to_feather(save_path, index=False)
             
         else:
             print("unknown file type!?")

@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+# I think this joins horizontally
 
 # Define the folder path where the CSV files are located
 folder_path = "/Users/richardbarrett-jolley/Library/CloudStorage/OneDrive-TheUniversityofLiverpool/Data/seanb/2024_02_23/output"
