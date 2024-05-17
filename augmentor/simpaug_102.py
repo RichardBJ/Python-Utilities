@@ -52,7 +52,7 @@ def stretch_df(df, factor):
             aug_df[column] = resampled_data
     return aug_df
 
-def augment_dataframe(file, df, num_copies):
+def augment_dataframe(file, df, num_copies, timef, noisef):
     # Process each desired copy
     print(f"Processing {file}")
     for i in range(1, num_copies + 1):
@@ -66,7 +66,8 @@ def augment_dataframe(file, df, num_copies):
             df = upsampled_signal.interpolate(method='linear')
         else:
             #Make the new output factor times as long
-            factor = np.random.uniform(0.2, 5)
+            factor = np.random.uniform(1 - (timef/100), 1 + (timef/100) )
+            print(f"Time stretch factor = {factor}")
             if factor < 1:
                 aug_df = shrink_df(df, factor)
             elif factor == 1:
@@ -77,7 +78,7 @@ def augment_dataframe(file, df, num_copies):
 
         # Generate random numbers between -0.1 and +0.1
         mean = df["Noisy Current"].mean()
-        random_values = np.random.uniform(low=-0.01*mean, high=0.01*mean, size=len(aug_df))
+        random_values = np.random.uniform(low=-noisef*mean, high=noisef*mean, size=len(aug_df))
 
         # Add the random values to the 'Channel 0' column
         aug_df["Noisy Current"] += random_values
@@ -92,6 +93,15 @@ def process_and_save_selected_dataframes():
     copies, ok = QInputDialog.getInt(None, "Number of copies", "Integer value:")
     if not ok:
         sys.exit("No copies set")
+        
+    timeflex, ok = QInputDialog.getInt(None, "Percentage time wobble % (int)", "Integer value:")
+    if not ok or timeflex == 0:
+        sys.exit("No timeflex set")
+        
+    noiseadd, ok = QInputDialog.getDouble(None, "Noise fractise of current noixd", "float value:")
+    if not ok or noiseadd <= 0:
+        sys.exit("No noise set")
+        
     # Check if any files were selected
     if not selected_files:
         print("No files selected. Exiting.")
@@ -104,7 +114,7 @@ def process_and_save_selected_dataframes():
         try:
             # Read the selected Parquet file into a pandas DataFrame
             df = pd.read_parquet(selected_file)
-            augment_dataframe(selected_file, df, copies)
+            augment_dataframe(selected_file, df, copies, timeflex, noiseadd)
         except Exception as e:
             print(f"Error processing {filename}: {str(e)}")
 

@@ -13,7 +13,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PyQt5.QtCore import Qt
 
-MAXROWS=100000
+MAXROWS=1000000
 # TODO Needs to allow reading of other columns if no "Noisy Current", etc.
 # Should do this but seems to fail sometimes?
 
@@ -62,8 +62,7 @@ class ApplicationWindow(QWidget):
         vbox.addWidget(self.window_slider)
 
         self.setLayout(vbox)
-        if not self.freeformat:
-            self.corner_points = self.make_corners()
+        self.corner_points = self.make_corners()
 
         # Draw the initial plot
         self.draw_plot()
@@ -143,7 +142,7 @@ class ApplicationWindow(QWidget):
         if self.current_file_index < len(self.file_list) - 1:
             reply = QMessageBox.question(self, 'Open Next File',
                     'Do you want to open the next file?',
-                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                     QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
             if reply == QMessageBox.Yes:
                 next_file = self.file_list[self.current_file_index + 1]
                 self.open_file(next_file)
@@ -182,16 +181,21 @@ class ApplicationWindow(QWidget):
         else:
             print("\nApparently no Channels column!!?")
             maxc = 1
+            
+        if not "Noisy Current" in df.columns:
+            # freeformat = True
+            # Try this instead
+            df["Noisy Current"]=df["Channel 0"]
 
         if "Noisy Current" in df.columns:
             df["Noisy Current"] = scale(df["Noisy Current"], out_range=(0, maxc))
         else:
             print("\nApparently no Noisy Current column!!?")
-            freeformat = True
+            self.freeformat = True
 
 
         # Create a new ApplicationWindow for the loaded file
-        self.new_window = ApplicationWindow(df, freeformat, filename, self.file_list)
+        self.new_window = ApplicationWindow(df, self.freeformat, filename, self.file_list)
         self.new_window.show()
         self.close()
 
@@ -228,21 +232,19 @@ def main():
             df = pd.read_feather(filename)
         print("File read")
         df = df.iloc[:MAXROWS,:]
+        if not "Noisy Current" in df.columns:
+            # freeformat = True
+            # Try this instead
+            df["Noisy Current"]=scale(df["Channel 0"], out_range=(0,1))
+        else:
+            df["Noisy Current"]=scale(df["Noisy Current"], out_range=(0,1))
+            
         # Create the application window
         window = ApplicationWindow(df, freeformat, filename, file_list)
         window.show()
 
         # Start the application
         sys.exit(app.exec_())
-
-        reply = QMessageBox.question(None,'Open Next File',
-                'Do you want to open the next file?',
-                 QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        if reply == QMessageBox.Yes:
-            continue
-        else:
-            break
-
 
 
 if __name__ == '__main__':
