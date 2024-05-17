@@ -16,13 +16,13 @@ app = QApplication([])
 # Open file dialog to select the parquet file
 file_dialog = QFileDialog()
 parquet_file_path, _ = file_dialog.getOpenFileName()
+# Define the number of splits
+num_splits = 5  # Change this to your desired number of splits
 if parquet_file_path:
     # Read the parquet file
+    print(f"Reading file {parquet_file_path}")
     df = pd.read_parquet(parquet_file_path)
-
-    # Define the number of splits
-    num_splits = 5  # Change this to your desired number of splits
-
+    print("File read")
     # Calculate the length of each split
     split_len = math.floor(len(df) / num_splits)
     si = (df["Time"][100]-df["Time"][50])/50

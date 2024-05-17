@@ -14,7 +14,8 @@ import matplotlib.pyplot as plt
 from PyQt5.QtCore import Qt
 
 MAXROWS=100000
-
+# TODO Needs to allow reading of other columns if no "Noisy Current", etc.
+# Should do this but seems to fail sometimes?
 
 class ApplicationWindow(QWidget):
     def __init__(self, df, freeformat, filename, file_list):
@@ -80,7 +81,6 @@ class ApplicationWindow(QWidget):
             #No bloody channels?
             corner_points= [(0,0),(max(x),0)]
             return corner_points
-        print(len(y))
         #Trying another way get diffs
         diffs = np.diff(y)
         #Then be sure first and last points captured
@@ -214,6 +214,7 @@ def main():
 
     # Open the first file
     for filename in file_list:
+        print(f"Reading {filename}")
         if ".csv" in filename.lower():
             df = pd.read_csv(filename)
         elif ".txt" in filename.lower():
@@ -225,6 +226,7 @@ def main():
             df = pd.read_parquet(filename)
         else:
             df = pd.read_feather(filename)
+        print("File read")
         df = df.iloc[:MAXROWS,:]
         # Create the application window
         window = ApplicationWindow(df, freeformat, filename, file_list)
