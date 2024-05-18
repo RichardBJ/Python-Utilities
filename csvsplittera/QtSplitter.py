@@ -17,7 +17,7 @@ app = QApplication([])
 file_dialog = QFileDialog()
 parquet_file_path, _ = file_dialog.getOpenFileName()
 # Define the number of splits
-num_splits = 20  # Change this to your desired number of splits
+num_splits = 200  # Change this to your desired number of splits
 if parquet_file_path:
     # Read the parquet file
     print(f"Reading file {parquet_file_path}")
