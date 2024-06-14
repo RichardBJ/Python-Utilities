@@ -7,11 +7,14 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import os
+import random
 import pyarrow.parquet as pq
 from pyarrow.parquet import ParquetFile
 from PyQt5.QtWidgets import QApplication, QFileDialog
 
 MAXSIZE = 50000
+ONLYNEW = True
+
 def plot_and_save(df, x_col, y_cols, filename):
     fig, axes = plt.subplots(nrows=len(y_cols), ncols=1, figsize=(20, 5*len(y_cols)), sharex=True)
     if not isinstance(axes, np.ndarray):
@@ -30,6 +33,7 @@ def plot_and_save(df, x_col, y_cols, filename):
 def main():
     app = QApplication([])
     files, _ = QFileDialog.getOpenFileNames(None, "Select Files", "", "Parquet Files (*.parquet)")
+    files = sorted(files, key=lambda x: random.random())
     y_cols = []
     x_col = None
     if files:
@@ -48,7 +52,10 @@ def main():
         for i, file in enumerate(files):
             print(f"File {i} of {len(files)}")
             print(f"processing file: {file}")
-
+            outfile = file.replace(".parquet", ".png")
+            if os.path.isfile(outfile) and ONLYNEW:
+                continue
+                """skip if already present"""
             parquet_file = pq.ParquetFile(file)
                     
             for j, batch in enumerate( parquet_file.iter_batches()):
@@ -68,7 +75,7 @@ def main():
                 print("EXCEPTION: Assume this was a very short file?")
                 df = data.to_pandas()
             """
-            outfile = file.replace(".parquet", ".png")
+            
             plot_and_save(df, x_col, y_cols, outfile)
 
 if __name__ == "__main__":
