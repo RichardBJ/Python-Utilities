@@ -13,9 +13,10 @@ from pyarrow.parquet import ParquetFile
 from PyQt5.QtWidgets import QApplication, QFileDialog
 
 MAXSIZE = 50000
-ONLYNEW = True
+ONLYNEW = False
 
 def plot_and_save(df, x_col, y_cols, filename):
+    print(f"plotting df. Shape is {df.shape}")
     fig, axes = plt.subplots(nrows=len(y_cols), ncols=1, figsize=(20, 5*len(y_cols)), sharex=True)
     if not isinstance(axes, np.ndarray):
         axes = np.array([axes])
@@ -23,7 +24,27 @@ def plot_and_save(df, x_col, y_cols, filename):
         axes[i].plot(df[x_col], df[y_col], label=y_col)
         axes[i].set_ylabel(y_col)
         axes[i].legend()
-    axes[-1].set_xlabel(x_col)
+    n_ticks = 10  
+    axes[-1].set_xlabel(x_col)  
+    
+    # Get the data range
+    x_min, x_max = axes[-1].get_xlim()
+    
+    # Create fixed ticks
+    ticks = np.linspace(x_min, x_max, n_ticks)
+    
+    # Round the ticks to a reasonable precision (optional)
+    ticks = np.round(ticks, decimals=1)  # Round to 1 decimal place
+    
+    # Format the labels
+    labels = [f'{tick:.1f}' for tick in ticks]
+    
+    # Set the ticks and labels
+    axes[-1].set_xticks(ticks)
+    axes[-1].set_xticklabels(labels)
+    
+    # Optionally, rotate labels if they overlap
+    plt.xticks(rotation=45)
     title = os.path.basename(filename)
     plt.suptitle(title)
     plt.tight_layout()
@@ -54,18 +75,20 @@ def main():
             print(f"processing file: {file}")
             outfile = file.replace(".parquet", ".png")
             if os.path.isfile(outfile) and ONLYNEW:
+                print(f"{file} already done, skipping")
                 continue
                 """skip if already present"""
             parquet_file = pq.ParquetFile(file)
                     
             for j, batch in enumerate( parquet_file.iter_batches()):
-                print("Processing batch {j}")
+                print(f"Processing batch {j}")
                 new_batch_df = batch.to_pandas()
                 if j==0:
                     df = new_batch_df
                 else:
                     df = pd.concat([df,new_batch_df],axis=1)
                 if len(df) > MAXSIZE:
+                    print("Cropping to size")
                     df = df[:MAXSIZE]
                     break
             """
