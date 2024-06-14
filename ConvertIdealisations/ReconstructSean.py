@@ -25,7 +25,9 @@ from tkinter.filedialog import askdirectory
 
 FILETYPE="abf" #Not actually the file type, but the type of file.
 #File type itself will really be txt, csv or parquet
-TIMEFACTOR = 0.005
+TIMEFACTOR = 0.004
+#Up is typically open
+FLIP=True
 
 # Create the root Tk window
 root = tk.Tk()
@@ -187,7 +189,11 @@ for i, df in enumerate(idldfs):
 for i in range(len(idlfiles) ):
     print(f"\nsticking together file {i} of {len(idldata)-1}")
     df=rawdfs[i]
-
+    if FLIP==True:
+        try:
+            df["Noisy Current"] = df["Noisy Current"] * -1
+        except:
+            print(f"TROUBLE FLIPPING FOR {outfiles[i]}")
     try:
         df["Channels"]=idldata[i]
         print(f"OUTPUTTING TO {outfiles[i]}")

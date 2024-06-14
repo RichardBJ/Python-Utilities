@@ -250,7 +250,11 @@ def main():
         df = pd.read_feather(filename)
     else:
         df = pd.read_feather(filename)
-    signal_column = 'Noisy Current'  # Replace with your column name
+    if "Noisy Current" in df.columns:
+        signal_column = 'Noisy Current'  # Replace with your column name
+    elif "Channel 0" in df.columns:
+        df.rename(columns={"Channel 0":"Noisy Current"}, inplace=True)
+        signal_column = 'Noisy Current'
     if "Channels" in df.columns:
         threshed_col = "Thresholded"
     else:
