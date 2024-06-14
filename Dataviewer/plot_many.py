@@ -25,7 +25,7 @@ def plot_and_save(df, x_col, y_cols, filename):
         axes[i].set_ylabel(y_col)
         axes[i].legend()
     n_ticks = 10  
-    axes[-1].set_xlabel(x_col)
+    axes[-1].set_xlabel(x_col)  
     
     # Get the data range
     x_min, x_max = axes[-1].get_xlim()
