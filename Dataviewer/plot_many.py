@@ -59,6 +59,7 @@ def main():
             parquet_file = pq.ParquetFile(file)
                     
             for j, batch in enumerate( parquet_file.iter_batches()):
+                print("Processing batch {j}")
                 new_batch_df = batch.to_pandas()
                 if j==0:
                     df = new_batch_df
