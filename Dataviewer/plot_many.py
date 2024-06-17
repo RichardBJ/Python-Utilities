@@ -59,7 +59,7 @@ def main():
     if files:
          # New code to create a dialog box
         msgBox = QMessageBox()
-        msgBox.setText("Should ONLYNEW be True or False?")
+        msgBox.setText("Only write new files (else will overwrite existing)?")
         msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
         returnValue = msgBox.exec()
         if returnValue == QMessageBox.Yes:
