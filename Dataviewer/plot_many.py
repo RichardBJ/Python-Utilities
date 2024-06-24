@@ -11,7 +11,7 @@ import random
 import pyarrow.parquet as pq
 from PyQt5.QtWidgets import QApplication, QFileDialog, QMessageBox
 
-MAXSIZE = 50000
+MAXSIZE = 150000
 ONLYNEW = True
 
 def plot_and_save(df, x_col, y_cols, filename):

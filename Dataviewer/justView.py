@@ -232,6 +232,10 @@ def main():
             df = pd.read_feather(filename)
         print("File read")
         df = df.iloc[:MAXROWS,:]
+        for col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors='coerce')
+            if col == "Channels":
+                df[col] = df[col].astype('int64')
         if not "Noisy Current" in df.columns:
             # freeformat = True
             # Try this instead
