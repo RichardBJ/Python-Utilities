@@ -3,14 +3,12 @@
 Created on Sat Mar 25 2024
 @author: rbj
 """
-import os
 import sys
 from PyQt5.QtWidgets import QApplication, QVBoxLayout, QWidget, QSlider, QLabel, QFileDialog, QMessageBox
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas, NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 from PyQt5.QtCore import Qt
 
 MAXROWS=1000000
