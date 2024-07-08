@@ -1,7 +1,7 @@
 import hashlib, glob
 import pandas as pd
 
-files = glob.glob(r"data/*gz", recursive=True)
+files = glob.glob(r"**/*.gz", recursive=True)
 
 table={}
 for row, file in enumerate(files):
