@@ -1,0 +1,4 @@
+#My reason to be
+This file is largely so when I search "checksum" or "checksums"...
+something shows up!!!
+I've a few scripts to do this and I can never find them. I intend to collect them here!
