@@ -10,6 +10,12 @@ from PyQt5.QtWidgets import QApplication
 import os
 import math
 import numpy as np
+"""
+splits parquet format files. Also this version assumes there is
+a Time column. Set the number of splits within the code as indicated.
+Output will be a set of parquet files with {number} at the end.
+
+"""
 
 app = QApplication([])
 
@@ -17,7 +23,7 @@ app = QApplication([])
 file_dialog = QFileDialog()
 parquet_file_path, _ = file_dialog.getOpenFileName()
 # Define the number of splits
-num_splits = 30  # Change this to your desired number of splits
+num_splits = 50  # Change this to your desired number of splits
 if parquet_file_path:
     # Read the parquet file
     print(f"Reading file {parquet_file_path}")
