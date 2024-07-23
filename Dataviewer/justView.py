@@ -3,19 +3,19 @@
 Created on Sat Mar 25 2024
 @author: rbj
 """
-import os
 import sys
 from PyQt5.QtWidgets import QApplication, QVBoxLayout, QWidget, QSlider, QLabel, QFileDialog, QMessageBox
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas, NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 from PyQt5.QtCore import Qt
 
 MAXROWS=1000000
+SCALE = False
 # TODO Needs to allow reading of other columns if no "Noisy Current", etc.
 # Should do this but seems to fail sometimes?
+#TEMP ADDITON OF SCALE OR NOT. SHOULD BE WAY SMARTER!!
 
 class ApplicationWindow(QWidget):
     def __init__(self, df, freeformat, filename, file_list):
@@ -200,9 +200,12 @@ class ApplicationWindow(QWidget):
         self.close()
 
 def scale(x, out_range=(0, 1)):
-    domain = np.min(x), np.max(x)
-    y = (x - domain[0]) / (domain[1] - domain[0])
-    scaled_array = y * (out_range[1] - out_range[0]) + out_range[0]
+    if SCALE:
+        domain = np.min(x), np.max(x)
+        y = (x - domain[0]) / (domain[1] - domain[0])
+        scaled_array = y * (out_range[1] - out_range[0]) + out_range[0]
+    else:
+        scaled_array=x
     return scaled_array
 
 def main():
@@ -232,6 +235,10 @@ def main():
             df = pd.read_feather(filename)
         print("File read")
         df = df.iloc[:MAXROWS,:]
+        for col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors='coerce')
+            if col == "Channels":
+                df[col] = df[col].astype('int64')
         if not "Noisy Current" in df.columns:
             # freeformat = True
             # Try this instead

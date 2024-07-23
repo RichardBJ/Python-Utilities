@@ -9,11 +9,10 @@ import numpy as np
 import os
 import random
 import pyarrow.parquet as pq
-from pyarrow.parquet import ParquetFile
-from PyQt5.QtWidgets import QApplication, QFileDialog
+from PyQt5.QtWidgets import QApplication, QFileDialog, QMessageBox
 
-MAXSIZE = 50000
-ONLYNEW = False
+MAXSIZE = 150000
+ONLYNEW = True
 
 def plot_and_save(df, x_col, y_cols, filename):
     print(f"plotting df. Shape is {df.shape}")
@@ -58,6 +57,15 @@ def main():
     y_cols = []
     x_col = None
     if files:
+         # New code to create a dialog box
+        msgBox = QMessageBox()
+        msgBox.setText("Only write new files (else will overwrite existing)?")
+        msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        returnValue = msgBox.exec()
+        if returnValue == QMessageBox.Yes:
+            ONLYNEW = True
+        else:
+            ONLYNEW = False
         df = pd.read_parquet(files[0])
         print("Columns in the DataFrame: ", df.columns.tolist())
         num_cols = input("How many Y columns do you want to plot? ")
@@ -99,8 +107,11 @@ def main():
                 print("EXCEPTION: Assume this was a very short file?")
                 df = data.to_pandas()
             """
-            
-            plot_and_save(df, x_col, y_cols, outfile)
+            try:
+                plot_and_save(df, x_col, y_cols, outfile)
+            except:
+                print(f"Seems there was an error with {file}")
+                continue
 
 if __name__ == "__main__":
     main()
