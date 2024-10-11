@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parquet File Graph</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/apache-arrow/9.0.0/Arrow.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+</head>
+<body>
+    <input type="file" id="fileInput" accept=".parquet">
+    <canvas id="myChart"></canvas>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const ctx = document.getElementById('myChart').getContext('2d');
+        let chart;
+
+        fileInput.addEventListener('change', async (event) => {
+            const file = event.target.files[0];
+            const arrayBuffer = await file.arrayBuffer();
+
+            const table = await Arrow.Table.from(new Uint8Array(arrayBuffer));
+            const data = table.toArray();
+
+            const xValues = data.slice(0, 1000).map(row => row['x']);
+            const y1Values = data.slice(0, 1000).map(row => row['y1']);
+            const y2Values = data.slice(0, 1000).map(row => row['y2']);
+
+            if (chart) {
+                chart.destroy();
+            }
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: xValues,
+                    datasets: [
+                        {
+                            label: 'Y1',
+                            data: y1Values,
+                            borderColor: 'rgb(75, 192, 192)',
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Y2',
+                            data: y2Values,
+                            borderColor: 'rgb(255, 99, 132)',
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Parquet File Graph (First 1000 Rows)'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'X Values'
+                            }
+                        },
+                        y: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Y Values'
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
