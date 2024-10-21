@@ -7,3 +7,4 @@
 *.bin
 *.model
 *.h5
+*.parquet
