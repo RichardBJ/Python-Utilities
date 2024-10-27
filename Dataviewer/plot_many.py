@@ -11,7 +11,7 @@ import random
 import pyarrow.parquet as pq
 from PyQt5.QtWidgets import QApplication, QFileDialog, QMessageBox
 
-MAXSIZE = 150000
+MAXSIZE = 15000
 ONLYNEW = True
 
 def plot_and_save(df, x_col, y_cols, filename):
@@ -57,7 +57,7 @@ def main():
     y_cols = []
     x_col = None
     if files:
-         # New code to create a dialog box
+        # New code to create a dialog box
         msgBox = QMessageBox()
         msgBox.setText("Only write new files (else will overwrite existing)?")
         msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
