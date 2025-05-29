@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import csv, sys
 from matplotlib import pyplot as plt
 import numpy as np

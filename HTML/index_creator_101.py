@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 python mhtml_indexer.py /path/to/your/folder
 

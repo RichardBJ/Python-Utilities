@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import re
 
 def calibrate(raw, YZ, AD, YCF, YAG, ADCMAX):
