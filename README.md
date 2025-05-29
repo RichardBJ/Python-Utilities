@@ -20,4 +20,9 @@ done
 
 but obviously get the path right!
 
+Noticed github will ruin this so try this to preserve the executableness
+(type of thing)
+git update-index --chmod=+x run_model_593.sh
+git commit -m "Fix: make script executable"
+
 

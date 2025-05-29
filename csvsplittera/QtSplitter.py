@@ -5,7 +5,7 @@ Modified version of QtSplitter.py with type conversion fix
 """
 
 import pandas as pd
-from PyQt5.QtWidgets import QFileDialog, QApplication
+from PyQt5.QtWidgets import QFileDialog, QApplication, QInputDialog
 import os
 import math
 import numpy as np
@@ -116,19 +116,33 @@ def main():
     # Initialize Qt application
     app = QApplication([])
     
-    # Open file dialog to select multiple files
-    file_dialog = QFileDialog()
-    file_dialog.setFileMode(QFileDialog.ExistingFiles)
-    file_dialog.setNameFilter("Data files (*.csv *.parquet *.pq)")
+     # Number of splits
+    num_splits, ok = QInputDialog.getInt(
+        None,  # parent widget
+        "Number of Splits",  # dialog title
+        "Enter the number of splits per file:",  # prompt text
+        50,  # default value
+        1,   # minimum value
+        1000,  # maximum value
+        1    # step
+    )
     
-    if file_dialog.exec_():
-        file_paths = file_dialog.selectedFiles()
-        if file_paths:
-            process_multiple_files(file_paths, num_splits=50)
+    if ok:
+        # Open file dialog to select multiple files
+        file_dialog = QFileDialog()
+        file_dialog.setFileMode(QFileDialog.ExistingFiles)
+        file_dialog.setNameFilter("Data files (*.csv *.parquet *.pq)")
+        
+        if file_dialog.exec_():
+            file_paths = file_dialog.selectedFiles()
+            if file_paths:
+                process_multiple_files(file_paths, num_splits=num_splits)
+            else:
+                print("No files selected.")
         else:
-            print("No files selected.")
+            print("File selection cancelled.")
     else:
-        print("File selection cancelled.")
+        print("Split count selection cancelled.")
 
 if __name__ == "__main__":
     main()
