@@ -1,4 +1,4 @@
-find ~/LGithub/Python-Utilities -type f -name "*.py" | while read -r file; do
+find ~/LGitHub/Python-Utilities -type f -name "*.py" | while read -r file; do
     first_line=$(head -n 1 "$file")
     if [[ "$first_line" != "#!/usr/bin/env python3" ]]; then
         echo "Adding shebang to $file"
@@ -9,3 +9,4 @@ find ~/LGithub/Python-Utilities -type f -name "*.py" | while read -r file; do
         chmod +x "$file"
     fi
 done
+
