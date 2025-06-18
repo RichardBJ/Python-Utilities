@@ -2,8 +2,6 @@
 *.zip
 *.bak
 .DS_Store
-.DS_Store
-*DS_Store
 *.bin
 *.model
 *.h5
