@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+#!/usr/bin/env python3
 import tkinter as tk
 from tkinter import filedialog, simpledialog
 import pandas as pd

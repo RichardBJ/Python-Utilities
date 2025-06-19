@@ -1,0 +1,7 @@
+To Diff two files. I am using this system
+
+1) My office PC WSL2
+2) the conda nbdime-env environment.
+3) Copy the two files to my this git repository....
+4) Run nbdiff-web --sources A.ipynb B.ipynb
+5) copy the server address to your regular browser: http://127.0.0.1:34433/diff?base=A.ipynb&remote=B.ipynb
